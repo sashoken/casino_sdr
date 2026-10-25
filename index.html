@@ -1,9 +1,19 @@
 <!DOCTYPE html>
+<!--
+  ВАЖНО ДЛЯ ЛЮБОГО ИИ (Claude и др.), который правит этот файл / IMPORTANT FOR ANY AI EDITING THIS FILE:
+  1) Каждое обновление = новая версия «Alpha X.Y». Номер повышай сам, строго по порядку (сейчас Alpha 3.4).
+  2) Если пользователь прислал запрос БЕЗ списка изменений для новой версии — НЕ делай файл.
+     Сначала попроси у пользователя список изменений, и только потом вноси правки.
+     If the request has NO changelog for the new version — do NOT build the file; ask the user for the changelog first.
+  3) Получив список, обязательно добавь версию в массив CL (меню «Список изменений» в настройках)
+     с переводами на ВСЕ языки игры (rus/ru, en, be, uk; язык «us» делается автотранслитом из ru).
+  4) Ключ хранения аккаунтов 'sdr-casino-accounts' и коллекцию Firebase 'accounts' не менять; базу подарочных кодов не трогать без просьбы.
+-->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Казино СДР</title>
+<title>BonusDrop</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
 <style>
 :root{--bg:#000;--panel:#0b0b0b;--ink:#f2f2f2;--mute:#9a9a9a;--brass:#e6b95c;--win:#6fe3b0;--lose:#ff7d93;--reel:#000;--line:#2a2a2a;--btn:#e6b95c;--btnink:#000;
@@ -13,8 +23,8 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
-#app{max-width:520px;margin:0 auto;padding:20px 16px 32px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "bal" "machine" "gift" "add" "rst" "pay" "foot"}
-.giftc{grid-area:gift}.top{grid-area:top}.balw{grid-area:bal}.rstc{grid-area:rst}.machine{grid-area:machine}.addc{grid-area:add}.payc{grid-area:pay}.foot{grid-area:foot}
+#app{max-width:520px;margin:0 auto;padding:20px 16px 32px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "bal" "machine" "gift" "wd" "add" "rst" "pay" "foot"}
+.giftc{grid-area:gift}.wdc{grid-area:wd}.top{grid-area:top}.balw{grid-area:bal}.rstc{grid-area:rst}.machine{grid-area:machine}.addc{grid-area:add}.payc{grid-area:pay}.foot{grid-area:foot}
 h1{font-size:1.5rem;font-weight:800;margin:0}
 h2{margin:0 0 4px;font-size:1.2rem}
 .sub{color:var(--mute);margin:2px 0 0;font-size:.9rem}
@@ -83,10 +93,10 @@ input[type=range]{padding:0;accent-color:var(--brass)}
 @keyframes zoom{0%{transform:scale(.2);opacity:0}70%{transform:scale(1.15)}}
 .reel.thud{animation:thud .22s}
 @keyframes thud{40%{transform:translateY(4px) scaleY(.985)}}
-.toast{position:fixed;inset:auto;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));margin:0;transform:translate(-50%,16px);max-width:90vw;padding:12px 18px;border:1px solid var(--brass);border-radius:999px;background:var(--panel);color:var(--ink);font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;overflow:visible;z-index:100}
-.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast{position:fixed;inset:auto 0 calc(24px + env(safe-area-inset-bottom,0px)) 0;margin:0 auto;width:max-content;max-width:min(92vw,440px);transform:translateY(16px) scale(.96);padding:12px 18px;border:1px solid var(--brass);border-radius:16px;background:var(--panel);color:var(--ink);font-weight:700;text-align:center;line-height:1.3;overflow-wrap:anywhere;box-shadow:0 8px 30px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s,transform .3s cubic-bezier(.2,.9,.3,1.2);overflow:visible;z-index:100}
+.toast.on{opacity:1;transform:none}
 @media (min-width:900px){
-#app{max-width:1080px;padding:28px 32px 40px;gap:18px;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:auto auto auto auto auto 1fr auto;grid-template-areas:"top top" "machine bal" "machine gift" "machine add" "machine rst" "machine pay" "foot foot";align-items:start}
+#app{max-width:1080px;padding:28px 32px 40px;gap:18px;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:auto auto auto auto auto auto 1fr auto;grid-template-areas:"top top" "machine bal" "machine gift" "machine wd" "machine add" "machine rst" "machine pay" "foot foot";align-items:start}
 .top{display:flex;justify-content:space-between;align-items:center;gap:20px}
 .ctl{margin-top:0}
 h1{font-size:2rem}
@@ -146,6 +156,48 @@ select{font:inherit;color:inherit;background:var(--reel);border:1px solid var(--
 :root[data-theme="light"] .spinbtn{background:linear-gradient(180deg,#2c2c30,#0b0b0c);box-shadow:0 10px 22px -10px rgba(0,0,0,.55)}
 :root[data-theme="light"] .bal b{color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.dbt b,.bal b.neg{animation:none}}
+
+/* ===== 3.4: интерфейс под любые языки ===== */
+h1{overflow-wrap:anywhere;background:linear-gradient(90deg,var(--brass),#ff9d5c,#6fe3b0,var(--brass));background-size:240% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rb 8s linear infinite}
+.top>div:first-child{min-width:0}.ctl{flex-wrap:wrap}
+button{overflow-wrap:anywhere;line-height:1.2}
+.betrow{flex-wrap:wrap}.betrow input{flex:1 1 80px}.betrow button{flex:0 0 auto}
+.bal{flex-wrap:wrap}.ver{flex-wrap:wrap;gap:8px}.lbl,.msg,td,.sub{overflow-wrap:anywhere}
+.tabs button{padding:10px 6px;font-size:.95rem}.xo span{min-width:0}.drow{flex-wrap:wrap}
+.csb>span:first-child{min-width:0;display:flex;align-items:center;gap:8px;overflow:hidden;white-space:nowrap}
+.add input{min-width:0}dialog{overflow-x:hidden}
+.bl{width:22px;height:22px;flex-shrink:0;border-radius:6px}
+/* ===== 3.4: анимации ===== */
+.menu:not([hidden]){animation:mpop .24s cubic-bezier(.2,.9,.3,1.2);transform-origin:top left}
+@keyframes mpop{from{opacity:0;transform:translateY(-8px) scale(.94)}}
+.menu:not([hidden]) .opt,.csm .xo{animation:oin .28s both}
+.menu .opt:nth-child(2),.csm .xo:nth-child(2){animation-delay:.03s}.menu .opt:nth-child(3),.csm .xo:nth-child(3){animation-delay:.06s}.menu .opt:nth-child(4),.csm .xo:nth-child(4){animation-delay:.09s}.menu .opt:nth-child(5),.csm .xo:nth-child(5){animation-delay:.12s}.menu .opt:nth-child(n+6),.csm .xo:nth-child(n+6){animation-delay:.15s}
+@keyframes oin{from{opacity:0;transform:translateX(-8px)}}
+.msg.an{animation:msgin .4s cubic-bezier(.2,.9,.3,1.2)}.msg.w.an{animation:msgwin .65s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes msgin{from{opacity:0;transform:translateY(10px)}}
+@keyframes msgwin{0%{opacity:0;transform:scale(.8)}45%{transform:scale(1.12);text-shadow:0 0 18px currentColor}100%{transform:none}}
+.fly{position:fixed;left:0;top:0;z-index:70;pointer-events:none;font-weight:800;font-size:1.4rem;color:var(--win);white-space:nowrap;text-shadow:0 2px 14px rgba(0,0,0,.55);will-change:transform}
+.bal b.bump{animation:bump .55s}
+@keyframes bump{40%{transform:scale(1.2);filter:brightness(1.5)}}
+.tt,.tt *{transition:background-color .5s,color .5s,border-color .5s,fill .5s,box-shadow .5s!important}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-old(root){z-index:1}::view-transition-new(root){z-index:2}
+/* ===== 3.4: вывод, телеграм, список изменений ===== */
+.wdsum{display:grid;gap:2px;margin:8px 2px;font-size:.9rem;color:var(--mute)}.wdsum b{color:var(--win);font-size:1.05rem}
+.wdc .spinbtn{margin-top:4px}.wdc .hint2,.hint2{color:var(--mute);font-size:.8rem;margin:8px 2px 0}
+.codebox{width:100%;background:var(--reel);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--ink);font:12px/1.4 ui-monospace,Consolas,monospace;word-break:break-all;resize:vertical}
+.wvr{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);font-size:.9rem}.wvr b{text-align:right;overflow-wrap:anywhere}.bad{color:var(--lose)}.good{color:var(--win)}
+.tgb{flex:1 1 100%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;border:0;color:#fff;font-size:.95rem;padding:12px 14px;border-radius:14px;background:linear-gradient(90deg,#229ed9,#2aabee,#229ed9);background-size:200% 100%;animation:rb 5s linear infinite;box-shadow:0 8px 22px -10px rgba(34,158,217,.8)}
+.tgb svg{width:22px;height:22px;flex-shrink:0}.tgb span{min-width:0}
+.tgb::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.45) 50%,transparent 60%);transform:translateX(-120%);animation:shn 3.2s infinite}
+@keyframes shn{to{transform:translateX(120%)}}
+.tgb.done{animation:none;filter:grayscale(.45);opacity:.85}.tgb.done::after{display:none}
+.clv{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0;animation:clin .45s both;animation-delay:var(--d,0ms)}
+@keyframes clin{from{opacity:0;transform:translateY(12px)}}
+.clh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.clh b{font-size:1.05rem}.cln{background:var(--btn);color:var(--btnink);border-radius:999px;padding:1px 9px;font-size:.75rem;font-weight:800}
+.clv ul{margin:6px 0 0;padding-left:1.1em}.clv li{margin:3px 0;overflow-wrap:anywhere}
+#clx{border:2px solid #e5484d}
+@media (prefers-reduced-motion:reduce){h1,.tgb,.tgb::after,.clv,.menu:not([hidden]),.csm,.menu .opt,.csm .xo,.msg.an,.bal b.bump{animation:none}.toast{transition:opacity .2s}}
 </style>
 </head>
 <body>
@@ -197,6 +249,10 @@ select{font:inherit;color:inherit;background:var(--reel);border:1px solid var(--
 </section>
 
 <section class="card giftc" id="giftc"><p class="lbl" data-t="gift"></p><div class="add"><input id="gin" data-ph="gph" autocomplete="off" spellcheck="false"><button class="go" id="gbtn" data-t="gact"></button></div></section>
+<section class="card wdc" id="wdc"><p class="lbl" data-t="wd"></p>
+<div class="add"><input id="wda" inputmode="decimal" data-ph="wdamt" autocomplete="off"><input id="wdp" inputmode="tel" data-ph="wdph" autocomplete="tel"></div>
+<div id="wbk" style="margin-top:6px"></div><div class="wdsum" id="wds"></div><p class="amsg" id="wdm" role="alert"></p>
+<button class="spinbtn" id="wdb" data-t="wdb"></button><p class="hint2" id="wdn"></p></section>
 <section class="card addc" id="addc" hidden>
 <p class="lbl" data-t="topup"></p>
 <div class="add">
@@ -206,13 +262,14 @@ select{font:inherit;color:inherit;background:var(--reel);border:1px solid var(--
 </div>
 </section>
 
-<section class="card rstc" id="rstc" hidden><button id="reset" data-t="reset" style="width:100%"></button></section>
+<section class="card rstc" id="rstc" hidden><button id="reset" data-t="reset" style="width:100%"></button><button id="wdchk" data-t="wdchk" style="width:100%;margin-top:8px"></button></section>
 <section class="card payc">
 <p class="lbl" data-t="pay"></p>
 <table id="paytable"></table>
 </section>
 
 <div class="foot">
+<button id="tg" class="tgb"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M21.4 3.6 2.9 10.8c-1.3.5-1.3 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.2-.5-1.8-1.3-1.4ZM8.8 13.4l9.5-6c.4-.3.8-.1.5.2l-7.9 7.1-.3 3.3-1.8-4.6Z"/></svg><span id="tgt"></span></button>
 <span id="stats"></span>
 </div>
 </div>
@@ -225,6 +282,7 @@ select{font:inherit;color:inherit;background:var(--reel);border:1px solid var(--
 <div class="row"><p class="lbl" data-t="snd"></p>
 <button id="snd" style="width:100%;margin-bottom:8px"></button>
 <input type="range" id="vol" min="0" max="100" data-al="vol"></div>
+<div class="row"><button id="clbtn" data-t="clb" style="width:100%"></button></div>
 <div class="row"><button id="devbtn" data-t="dev" style="width:100%"></button></div>
 <div class="ver"><span data-t="ver"></span><button id="close" data-t="close"></button></div>
 </dialog>
@@ -236,6 +294,9 @@ select{font:inherit;color:inherit;background:var(--reel);border:1px solid var(--
 <div id="auser" hidden></div>
 <div class="ver"><span></span><button id="aclose" data-t="close"></button></div></dialog>
 <dialog id="dev"><h2 data-t="dtitle"></h2><div id="dbody"></div><div class="ver"><span></span><button id="dclose" data-t="close"></button></div></dialog>
+<dialog id="wdd"><h2 id="wddt"></h2><p class="sub" id="wddi" style="color:var(--ink);margin:8px 0"></p><textarea id="wdcode" readonly rows="6" class="codebox"></textarea><div class="add" style="margin-top:10px"><button class="go" id="wdcp" data-t="wdcp" style="flex:1 1 140px"></button><button id="wdx" data-t="close" style="flex:1 1 100px"></button></div></dialog>
+<dialog id="wdv"><h2 data-t="wdchk"></h2><textarea id="wvin" rows="4" class="codebox" data-ph="wdchkph"></textarea><button class="spinbtn" id="wvb" data-t="wdv" style="margin-top:8px"></button><div id="wvr" style="margin-top:10px"></div><div class="ver"><span></span><button id="wvx" data-t="close"></button></div></dialog>
+<dialog id="cld"><h2 data-t="clt"></h2><div id="clbody"></div><div class="ver"><span data-t="ver"></span><button id="clx" data-t="close"></button></div></dialog>
 <div class="jp" id="jp" hidden><canvas id="cv"></canvas><div class="jpt" id="jpt"></div></div>
 <div class="toast" id="toast" popover="manual" role="status" aria-live="polite"></div>
 
@@ -266,10 +327,11 @@ var fUA=F('0 0 3 2','<rect width="3" height="1" fill="#0057b7"/><rect y="1" widt
 var fRU=F('0 0 3 2','<rect width="3" height=".667" fill="#fff"/><rect y=".667" width="3" height=".667" fill="#0039a6"/><rect y="1.333" width="3" height=".667" fill="#d52b1e"/>'),CF={'$':fUS,'€':fEU,'₽':fRU,'₹':fSDR,'₴':fUA,'Br':fBY},RF={SDR:fSDR,SNSR:fSU,SShM:fUS,RU:fRU,BY:fBY,UA:fUA},LF={rus:fRU,be:fBY,uk:fUA,ru:fSDR,en:fUK,us:fUS};
 
 /* язык */
-var D={ru:{title:'Казино СДР',sub:'Игровые деньги, настоящих здесь нет. Минимальная ставка — {x}.',bal:'Баланс',bet:'Ставка',spin:'Крутить',max:'Макс',topup:'Пополнение (режим разработчика)',add:'Пополнить',pay:'Таблица выплат (множитель ставки)',jp:'джекпот',pair:'Любая пара',reset:'Полный Сброс',stats:'Круток: {n} · выиграно: {w} · проиграно: {l}',settings:'Настройки',cur:'Валюта',reg:'Регион',lng:'Язык',snd:'Звук',son:'🔊 Звук включён',soff:'🔇 Звук выключен',vol:'Громкость',ver:'Версия: Alpha 3.3',close:'Закрыть',rates:'Курс: 1 $ = 60 ₹, 1 € = 65 ₹, 1 ₽ = {a} ₹ · ЦБ РФ на {d}: 1 $ = {b} ₽, 1 € = {c} ₽, 1 ₴ = {e} ₽, 1 Br = {f} ₽',hint:'Пробел — крутить · ↑↓ — ставка · M — звук',cU:'Доллар',cE:'Евро',cR:'Рубль СДР',cRF:'Российский рубль',rSDR:'СДР',rSNSR:'СНСР',rSShM:'СШМ',curL:'Выбор валюты',toL:'Включить светлую тему',toD:'Включить тёмную тему',minus:'Уменьшить ставку',plus:'Увеличить ставку',own:'Своя сумма',m0:'Сделайте ставку и крутите.',m1:'Крутим…',m2:'Мимо. Попробуйте ещё раз.',m3:'Три в ряд! Выигрыш {w} (×{m})',m4:'Пара! Возврат {w} (×{m})',m5:'Баланс исчерпан. Дальше можно играть в долг до −10 000 $ или ввести подарочный код ниже.',m6:'Превышен лимит долга (−10 000 $). Введите подарочный код или уменьшите ставку.',m7:'Введите сумму больше нуля.',m8:'Достигнут максимум баланса: {w}',m9:'Баланс пополнен на {w}.',m10:'Баланс сброшен до {w}.',jk:'ДЖЕКПОТ!',bw:'Большой выигрыш!',m11:'Один цвет! Ставка вернулась: {w} (×1)',m12:'Флаг Бурунди! Выигрыш {w} (×{m})',flag1:'один флаг',flag3:'три флага',color:'Все три одного цвета',login:'Вход',regis:'Регистрация',alog:'Логин',apass:'Пароль',a1:'Введите логин и пароль.',a2:'Такой логин уже занят.',a3:'Неверный логин или пароль.',logout:'Выйти',guest:'Гость (проба)',acct:'Аккаунт',ahello:'Вы вошли как {n}',ainfo:'Баланс сохраняется в аккаунте.',m13:'Для этого нужен аккаунт. Войдите или зарегистрируйтесь.',m14:'Деньги закончились. Войдите в аккаунт и введите подарочный код.',lock:'🔒 Только для аккаунтов',m3b:'Комбинация! Выигрыш {w} (×{m})',dev:'🛠 Режим разработчика',acc:'Аккаунт',welcome:'Добро пожаловать, {n}!',bye:'Вы вышли из аккаунта.',gift:'Подарочный код',gact:'Активировать',gph:'GIFT-XXXX-XXXX-XXXX',g1:'Код принят! Начислено {w}',g2:'Этот код уже использован на вашем аккаунте.',g3:'Неверный код.',g4:'Введите код.',copy:'Копировать',copied:'Скопировано',dtitle:'🛠 Режим разработчика',dpass:'Пароль',dgo:'Войти',dbad:'Неверный пароль',dbal:'Баланс',dset:'Задать',dch:'Шансы: вес категории (процент считается сам)',dpf:'% на барабан',dem:'Свой эмодзи: символ, ×выплата (три в ряд), вес',dcb:'Своя комбинация: 3 символа и ×выплата',dany:'любой порядок',drst:'Сбросить всё до стандартного',dgen:'Генератор подарочных кодов (сумма в $)',dsum:'Сумма, $',dmake:'Создать',dlist:'Готовые коды',dall:'Все суммы',dcur:'Валюта кода',topay:'ПОПОЛНИТЕ БАЛАНС',indebt:'Вы ушли в долг перед Казино',m15:'Баланс ушёл в минус: {w}. Можно играть дальше до −10 000 $ или пополнить баланс подарочным кодом.',rsure:'Нажмите ещё раз для полного сброса',accs:'Аккаунты',addacc:'Добавить аккаунт',editp:'Профиль',ava:'Аватарка',save:'Сохранить',cname:'Имя (логин)',curp:'Текущий пароль',newp:'Новый пароль (необязательно)',lim:'Лимит: 2 аккаунта. Больше — только у разработчика.',cdev:'Разработчик',cnorm:'Обычный',wrongp:'Неверный текущий пароль.',a4:'Введите текущий пароль.',saved:'Сохранено',back:'Назад',rRU:'Россия',rBY:'Беларусь',m16:'Баланса не хватает на такую же ставку — дальше игра пойдёт в долг.',addr:'Домашний адрес',addrph:'Любой текст',idbad:'ID: 8–10 символов, латиница и цифры.',idtaken:'Такой ID уже занят.',dacc:'Аккаунты: эмодзи и ID',rUA:'Украина',cH:'Гривна',cB:'Белорусский рубль',a5:'Логин: только английские буквы и цифры.',a6:'Выберите регион.',regsel:'Выберите регион',dneg:'Списание',g5:'Код принят! Списано {w}',bkc:'Копировать код аккаунта (резервная копия)',bkp:'Восстановить аккаунт по коду',bk2:'Неверный код аккаунта.',bkr:'Восстановить'},
-en:{title:'UDR Casino',sub:'Play money only, nothing here is real. Minimum bet is {x}.',bal:'Balance',bet:'Bet',spin:'Spin',max:'Max',topup:'Add funds (developer mode)',add:'Add',pay:'Paytable (bet multiplier)',jp:'jackpot',pair:'Any pair',reset:'Full Reset',stats:'Spins: {n} · won: {w} · lost: {l}',settings:'Settings',cur:'Currency',reg:'Region',lng:'Language',snd:'Sound',son:'🔊 Sound on',soff:'🔇 Sound off',vol:'Volume',ver:'Version: Alpha 3.3',close:'Close',rates:'Rates: 1 $ = 60 ₹, 1 € = 65 ₹, 1 ₽ = {a} ₹ · CBR on {d}: 1 $ = {b} ₽, 1 € = {c} ₽, 1 ₴ = {e} ₽, 1 Br = {f} ₽',hint:'Space — spin · ↑↓ — bet · M — sound',cU:'Dollar',cE:'Euro',cR:'UDR Ruble',cRF:'Russian Ruble',curL:'Choose currency',toL:'Switch to light theme',toD:'Switch to dark theme',minus:'Decrease bet',plus:'Increase bet',own:'Custom amount',m0:'Place a bet and spin.',m1:'Spinning…',m2:'No luck. Try again.',m3:'Three of a kind! You won {w} (×{m})',m4:'Pair! Returned {w} (×{m})',m5:'Balance used up. You can keep playing on credit down to −$10,000 or enter a gift code below.',m6:'Debt limit reached (−$10,000). Enter a gift code or lower the bet.',m7:'Enter an amount above zero.',m8:'Maximum balance reached: {w}',m9:'Added {w} to your balance.',m10:'Balance reset to {w}.',jk:'JACKPOT!',bw:'Big win!',m11:'Same color! Bet returned: {w} (×1)',m12:'Burundi flag! You won {w} (×{m})',flag1:'one flag',flag3:'three flags',color:'All three same color',rSDR:'UDR',rSNSR:'UNSR',rSShM:'USM',login:'Log in',regis:'Sign up',alog:'Username',apass:'Password',a1:'Enter a username and password.',a2:'This username is taken.',a3:'Wrong username or password.',logout:'Log out',guest:'Guest (trial)',acct:'Account',ahello:'Signed in as {n}',ainfo:'Your balance is saved to this account.',m13:'This needs an account. Log in or sign up.',m14:'Out of money. Log in and enter a gift code.',lock:'🔒 Accounts only',m3b:'Combo! You won {w} (×{m})',dev:'🛠 Developer mode',acc:'Account',welcome:'Welcome, {n}!',bye:'You logged out.',gift:'Gift code',gact:'Redeem',gph:'GIFT-XXXX-XXXX-XXXX',g1:'Code accepted! Added {w}',g2:'This code was already used on your account.',g3:'Invalid code.',g4:'Enter a code.',copy:'Copy',copied:'Copied',dtitle:'🛠 Developer mode',dpass:'Password',dgo:'Enter',dbad:'Wrong password',dbal:'Balance',dset:'Set',dch:'Chances: category weight (percent is calculated automatically)',dpf:'% per reel',dem:'Custom emoji: symbol, ×payout (three of a kind), weight',dcb:'Custom combo: 3 symbols and ×payout',dany:'any order',drst:'Reset everything to default',dgen:'Gift code generator (amount in $)',dsum:'Amount, $',dmake:'Generate',dlist:'Ready-made codes',dall:'All amounts',dcur:'Code currency',topay:'TOP UP YOUR BALANCE',indebt:'You are in debt to the Casino',m15:'Balance is negative: {w}. You can keep playing down to −$10,000 or redeem a gift code.',rsure:'Press again to confirm full reset',accs:'Accounts',addacc:'Add account',editp:'Profile',ava:'Avatar',save:'Save',cname:'Name (login)',curp:'Current password',newp:'New password (optional)',lim:'Limit: 2 accounts. Only developers can have more.',cdev:'Developer',cnorm:'Regular',wrongp:'Wrong current password.',a4:'Enter your current password.',saved:'Saved',back:'Back',rRU:'Russia',rBY:'Belarus',m16:'Not enough balance for the same bet — you will play on credit.',addr:'Home address',addrph:'Any text',idbad:'ID: 8–10 characters, Latin letters and digits.',idtaken:'This ID is taken.',dacc:'Accounts: emoji and ID',rUA:'Ukraine',cH:'Hryvnia',cB:'Belarusian Ruble',a5:'Username: English letters and digits only.',a6:'Choose a region.',regsel:'Choose a region',dneg:'Deduct',g5:'Code accepted! Deducted {w}',bkc:'Copy account code (backup)',bkp:'Restore account by code',bk2:'Invalid account code.',bkr:'Restore'}};
-D.be={title:'Казіно СДР',sub:'Гульнявыя грошы, сапраўдных тут няма. Мінімальная стаўка — {x}.',bal:'Баланс',bet:'Стаўка',spin:'Круціць',max:'Макс',settings:'Налады',cur:'Валюта',reg:'Рэгіён',lng:'Мова',snd:'Гук',close:'Зачыніць',login:'Уваход',regis:'Рэгістрацыя',alog:'Лагін',apass:'Пароль',a1:'Увядзіце лагін і пароль.',a2:'Такі лагін ужо занняты.',a3:'Няправільны лагін або пароль.',a5:'Лагін: толькі англійскія літары і лічбы.',a6:'Абярыце рэгіён.',regsel:'Абярыце рэгіён',logout:'Выйсці',acct:'Акаунт',guest:'Госць (проба)',gift:'Падарункавы код',gact:'Актываваць',addr:'Хатні адрас',addrph:'Любы тэкст',save:'Захаваць',back:'Назад',m0:'Зрабіце стаўку і круціце.',m1:'Круцім…',m2:'Міма. Паспрабуйце яшчэ раз.',m3:'Тры ў рад! Выйгрыш {w} (×{m})',m13:'Для гэтага патрэбны акаунт. Увайдзіце або зарэгіструйцеся.',welcome:'Сардэчна запрашаем, {n}!',saved:'Захавана',rRU:'Расія',rBY:'Беларусь',rUA:'Украіна'};
-D.uk={title:'Казино СДР',sub:'Ігрові гроші, справжніх тут немає. Мінімальна ставка — {x}.',bal:'Баланс',bet:'Ставка',spin:'Крутити',max:'Макс',settings:'Налаштування',cur:'Валюта',reg:'Регіон',lng:'Мова',snd:'Звук',close:'Закрити',login:'Вхід',regis:'Реєстрація',alog:'Логін',apass:'Пароль',a1:'Введіть логін і пароль.',a2:'Такий логін уже зайнятий.',a3:'Невірний логін або пароль.',a5:'Логін: лише англійські літери та цифри.',a6:'Оберіть регіон.',regsel:'Оберіть регіон',logout:'Вийти',acct:'Акаунт',guest:'Гість (проба)',gift:'Подарунковий код',gact:'Активувати',addr:'Домашня адреса',addrph:'Будь-який текст',save:'Зберегти',back:'Назад',m0:'Зробіть ставку і крутіть.',m1:'Крутимо…',m2:'Повз. Спробуйте ще раз.',m3:'Три в ряд! Виграш {w} (×{m})',m13:'Для цього потрібен акаунт. Увійдіть або зареєструйтесь.',welcome:'Ласкаво просимо, {n}!',saved:'Збережено',rRU:'Росія',rBY:'Білорусь',rUA:'Україна'};
+var D={ru:{title:'BonusDrop',sub:'Игровые деньги, настоящих здесь нет. Минимальная ставка — {x}.',bal:'Баланс',bet:'Ставка',spin:'Крутить',max:'Макс',topup:'Пополнение (режим разработчика)',add:'Пополнить',pay:'Таблица выплат (множитель ставки)',jp:'джекпот',pair:'Любая пара',reset:'Полный Сброс',stats:'Круток: {n} · выиграно: {w} · проиграно: {l}',settings:'Настройки',cur:'Валюта',reg:'Регион',lng:'Язык',snd:'Звук',son:'🔊 Звук включён',soff:'🔇 Звук выключен',vol:'Громкость',ver:'Версия: Alpha 3.4',close:'Закрыть',rates:'Курс: 1 $ = 60 ₹, 1 € = 65 ₹, 1 ₽ = {a} ₹ · ЦБ РФ на {d}: 1 $ = {b} ₽, 1 € = {c} ₽, 1 ₴ = {e} ₽, 1 Br = {f} ₽',hint:'Пробел — крутить · ↑↓ — ставка · M — звук',cU:'Доллар',cE:'Евро',cR:'Рубль СДР',cRF:'Российский рубль',rSDR:'СДР',rSNSR:'СНСР',rSShM:'СШМ',curL:'Выбор валюты',toL:'Включить светлую тему',toD:'Включить тёмную тему',minus:'Уменьшить ставку',plus:'Увеличить ставку',own:'Своя сумма',m0:'Сделайте ставку и крутите.',m1:'Крутим…',m2:'Мимо. Попробуйте ещё раз.',m3:'Три в ряд! Выигрыш {w} (×{m})',m4:'Пара! Возврат {w} (×{m})',m5:'Баланс исчерпан. Дальше можно играть в долг до −10 000 $ или ввести подарочный код ниже.',m6:'Превышен лимит долга (−10 000 $). Введите подарочный код или уменьшите ставку.',m7:'Введите сумму больше нуля.',m8:'Достигнут максимум баланса: {w}',m9:'Баланс пополнен на {w}.',m10:'Баланс сброшен до {w}.',jk:'ДЖЕКПОТ!',bw:'Большой выигрыш!',m11:'Один цвет! Ставка вернулась: {w} (×1)',m12:'Флаг Бурунди! Выигрыш {w} (×{m})',flag1:'один флаг',flag3:'три флага',color:'Все три одного цвета',login:'Вход',regis:'Регистрация',alog:'Логин',apass:'Пароль',a1:'Введите логин и пароль.',a2:'Такой логин уже занят.',a3:'Неверный логин или пароль.',logout:'Выйти',guest:'Гость (проба)',acct:'Аккаунт',ahello:'Вы вошли как {n}',ainfo:'Баланс сохраняется в аккаунте.',m13:'Для этого нужен аккаунт. Войдите или зарегистрируйтесь.',m14:'Деньги закончились. Войдите в аккаунт и введите подарочный код.',lock:'🔒 Только для аккаунтов',m3b:'Комбинация! Выигрыш {w} (×{m})',dev:'🛠 Режим разработчика',acc:'Аккаунт',welcome:'Добро пожаловать, {n}!',bye:'Вы вышли из аккаунта.',gift:'Подарочный код',gact:'Активировать',gph:'GIFT-XXXX-XXXX-XXXX',g1:'Код принят! Начислено {w}',g2:'Этот код уже использован на вашем аккаунте.',g3:'Неверный код.',g4:'Введите код.',copy:'Копировать',copied:'Скопировано',dtitle:'🛠 Режим разработчика',dpass:'Пароль',dgo:'Войти',dbad:'Неверный пароль',dbal:'Баланс',dset:'Задать',dch:'Шансы: вес категории (процент считается сам)',dpf:'% на барабан',dem:'Свой эмодзи: символ, ×выплата (три в ряд), вес',dcb:'Своя комбинация: 3 символа и ×выплата',dany:'любой порядок',drst:'Сбросить всё до стандартного',dgen:'Генератор подарочных кодов (сумма в $)',dsum:'Сумма, $',dmake:'Создать',dlist:'Готовые коды',dall:'Все суммы',dcur:'Валюта кода',topay:'ПОПОЛНИТЕ БАЛАНС',indebt:'Вы ушли в долг перед Казино',m15:'Баланс ушёл в минус: {w}. Можно играть дальше до −10 000 $ или пополнить баланс подарочным кодом.',rsure:'Нажмите ещё раз для полного сброса',accs:'Аккаунты',addacc:'Добавить аккаунт',editp:'Профиль',ava:'Аватарка',save:'Сохранить',cname:'Имя (логин)',curp:'Текущий пароль',newp:'Новый пароль (необязательно)',lim:'Лимит: 2 аккаунта. Больше — только у разработчика.',cdev:'Разработчик',cnorm:'Обычный',wrongp:'Неверный текущий пароль.',a4:'Введите текущий пароль.',saved:'Сохранено',back:'Назад',rRU:'Россия',rBY:'Беларусь',m16:'Баланса не хватает на такую же ставку — дальше игра пойдёт в долг.',addr:'Домашний адрес',addrph:'Любой текст',idbad:'ID: 8–10 символов, латиница и цифры.',idtaken:'Такой ID уже занят.',dacc:'Аккаунты: эмодзи и ID',rUA:'Украина',cH:'Гривна',cB:'Белорусский рубль',a5:'Логин: только английские буквы и цифры.',a6:'Выберите регион.',regsel:'Выберите регион',dneg:'Списание',g5:'Код принят! Списано {w}',bkc:'Копировать код аккаунта (резервная копия)',bkp:'Восстановить аккаунт по коду',bk2:'Неверный код аккаунта.',bkr:'Восстановить'},
+en:{title:'BonusDrop',sub:'Play money only, nothing here is real. Minimum bet is {x}.',bal:'Balance',bet:'Bet',spin:'Spin',max:'Max',topup:'Add funds (developer mode)',add:'Add',pay:'Paytable (bet multiplier)',jp:'jackpot',pair:'Any pair',reset:'Full Reset',stats:'Spins: {n} · won: {w} · lost: {l}',settings:'Settings',cur:'Currency',reg:'Region',lng:'Language',snd:'Sound',son:'🔊 Sound on',soff:'🔇 Sound off',vol:'Volume',ver:'Version: Alpha 3.4',close:'Close',rates:'Rates: 1 $ = 60 ₹, 1 € = 65 ₹, 1 ₽ = {a} ₹ · CBR on {d}: 1 $ = {b} ₽, 1 € = {c} ₽, 1 ₴ = {e} ₽, 1 Br = {f} ₽',hint:'Space — spin · ↑↓ — bet · M — sound',cU:'Dollar',cE:'Euro',cR:'UDR Ruble',cRF:'Russian Ruble',curL:'Choose currency',toL:'Switch to light theme',toD:'Switch to dark theme',minus:'Decrease bet',plus:'Increase bet',own:'Custom amount',m0:'Place a bet and spin.',m1:'Spinning…',m2:'No luck. Try again.',m3:'Three of a kind! You won {w} (×{m})',m4:'Pair! Returned {w} (×{m})',m5:'Balance used up. You can keep playing on credit down to −$10,000 or enter a gift code below.',m6:'Debt limit reached (−$10,000). Enter a gift code or lower the bet.',m7:'Enter an amount above zero.',m8:'Maximum balance reached: {w}',m9:'Added {w} to your balance.',m10:'Balance reset to {w}.',jk:'JACKPOT!',bw:'Big win!',m11:'Same color! Bet returned: {w} (×1)',m12:'Burundi flag! You won {w} (×{m})',flag1:'one flag',flag3:'three flags',color:'All three same color',rSDR:'UDR',rSNSR:'UNSR',rSShM:'USM',login:'Log in',regis:'Sign up',alog:'Username',apass:'Password',a1:'Enter a username and password.',a2:'This username is taken.',a3:'Wrong username or password.',logout:'Log out',guest:'Guest (trial)',acct:'Account',ahello:'Signed in as {n}',ainfo:'Your balance is saved to this account.',m13:'This needs an account. Log in or sign up.',m14:'Out of money. Log in and enter a gift code.',lock:'🔒 Accounts only',m3b:'Combo! You won {w} (×{m})',dev:'🛠 Developer mode',acc:'Account',welcome:'Welcome, {n}!',bye:'You logged out.',gift:'Gift code',gact:'Redeem',gph:'GIFT-XXXX-XXXX-XXXX',g1:'Code accepted! Added {w}',g2:'This code was already used on your account.',g3:'Invalid code.',g4:'Enter a code.',copy:'Copy',copied:'Copied',dtitle:'🛠 Developer mode',dpass:'Password',dgo:'Enter',dbad:'Wrong password',dbal:'Balance',dset:'Set',dch:'Chances: category weight (percent is calculated automatically)',dpf:'% per reel',dem:'Custom emoji: symbol, ×payout (three of a kind), weight',dcb:'Custom combo: 3 symbols and ×payout',dany:'any order',drst:'Reset everything to default',dgen:'Gift code generator (amount in $)',dsum:'Amount, $',dmake:'Generate',dlist:'Ready-made codes',dall:'All amounts',dcur:'Code currency',topay:'TOP UP YOUR BALANCE',indebt:'You are in debt to the Casino',m15:'Balance is negative: {w}. You can keep playing down to −$10,000 or redeem a gift code.',rsure:'Press again to confirm full reset',accs:'Accounts',addacc:'Add account',editp:'Profile',ava:'Avatar',save:'Save',cname:'Name (login)',curp:'Current password',newp:'New password (optional)',lim:'Limit: 2 accounts. Only developers can have more.',cdev:'Developer',cnorm:'Regular',wrongp:'Wrong current password.',a4:'Enter your current password.',saved:'Saved',back:'Back',rRU:'Russia',rBY:'Belarus',m16:'Not enough balance for the same bet — you will play on credit.',addr:'Home address',addrph:'Any text',idbad:'ID: 8–10 characters, Latin letters and digits.',idtaken:'This ID is taken.',dacc:'Accounts: emoji and ID',rUA:'Ukraine',cH:'Hryvnia',cB:'Belarusian Ruble',a5:'Username: English letters and digits only.',a6:'Choose a region.',regsel:'Choose a region',dneg:'Deduct',g5:'Code accepted! Deducted {w}',bkc:'Copy account code (backup)',bkp:'Restore account by code',bk2:'Invalid account code.',bkr:'Restore'}};
+D.be={title:'BonusDrop',sub:'Гульнявыя грошы, сапраўдных тут няма. Мінімальная стаўка — {x}.',bal:'Баланс',bet:'Стаўка',spin:'Круціць',max:'Макс',settings:'Налады',cur:'Валюта',reg:'Рэгіён',lng:'Мова',snd:'Гук',close:'Зачыніць',login:'Уваход',regis:'Рэгістрацыя',alog:'Лагін',apass:'Пароль',a1:'Увядзіце лагін і пароль.',a2:'Такі лагін ужо занняты.',a3:'Няправільны лагін або пароль.',a5:'Лагін: толькі англійскія літары і лічбы.',a6:'Абярыце рэгіён.',regsel:'Абярыце рэгіён',logout:'Выйсці',acct:'Акаунт',guest:'Госць (проба)',gift:'Падарункавы код',gact:'Актываваць',addr:'Хатні адрас',addrph:'Любы тэкст',save:'Захаваць',back:'Назад',m0:'Зрабіце стаўку і круціце.',m1:'Круцім…',m2:'Міма. Паспрабуйце яшчэ раз.',m3:'Тры ў рад! Выйгрыш {w} (×{m})',m13:'Для гэтага патрэбны акаунт. Увайдзіце або зарэгіструйцеся.',welcome:'Сардэчна запрашаем, {n}!',saved:'Захавана',rRU:'Расія',rBY:'Беларусь',rUA:'Украіна'};
+D.uk={title:'BonusDrop',sub:'Ігрові гроші, справжніх тут немає. Мінімальна ставка — {x}.',bal:'Баланс',bet:'Ставка',spin:'Крутити',max:'Макс',settings:'Налаштування',cur:'Валюта',reg:'Регіон',lng:'Мова',snd:'Звук',close:'Закрити',login:'Вхід',regis:'Реєстрація',alog:'Логін',apass:'Пароль',a1:'Введіть логін і пароль.',a2:'Такий логін уже зайнятий.',a3:'Невірний логін або пароль.',a5:'Логін: лише англійські літери та цифри.',a6:'Оберіть регіон.',regsel:'Оберіть регіон',logout:'Вийти',acct:'Акаунт',guest:'Гість (проба)',gift:'Подарунковий код',gact:'Активувати',addr:'Домашня адреса',addrph:'Будь-який текст',save:'Зберегти',back:'Назад',m0:'Зробіть ставку і крутіть.',m1:'Крутимо…',m2:'Повз. Спробуйте ще раз.',m3:'Три в ряд! Виграш {w} (×{m})',m13:'Для цього потрібен акаунт. Увійдіть або зареєструйтесь.',welcome:'Ласкаво просимо, {n}!',saved:'Збережено',rRU:'Росія',rBY:'Білорусь',rUA:'Україна'};
+Object.assign(D.ru,{"wd": "Вывод средств", "wdamt": "Сумма вывода", "wdph": "Номер телефона", "wdsel": "Выберите банк", "wdmin": "Минимум: {x} (≈ 1 $)", "wdfee": "Комиссия {p}%: {f}", "wdget": "К выплате: {n}", "wdb": "Вывести", "wdnote": "Выплата только в российских рублях по курсу ЦБ РФ на {d}. После вывода вы получите код — его нужно отправить администратору.", "wd1": "Сумма меньше минимальной (от 1 $ в эквиваленте).", "wd2": "Недостаточно средств на балансе.", "wd3": "Введите корректный номер телефона.", "wd4": "Выберите банк.", "wdok": "Заявка на вывод создана", "wdinfo": "С баланса списано {w}. Отправьте этот код администратору: после проверки вам выплатят {n} по курсу ЦБ РФ.", "wdcp": "Копировать код", "wdchk": "Проверка кода вывода", "wdchkph": "Вставьте код вывода", "wdv": "Проверить", "wdbad": "Код недействителен.", "wr1": "Код действителен", "wra": "Списано", "wrp": "К выплате", "wri": "ID аккаунта", "wrl": "Логин", "wrt": "Телефон", "wrk": "Банк", "wrd": "Дата", "wrf": "Комиссия", "wrb": "В базе", "wrb1": "найден", "wrb0": "не найден", "wrpd": "Отметить выплаченным", "wrpd1": "Выплачено", "tgb": "Подписаться на Telegram-канал · +{n}", "tgd": "Telegram-канал · награда получена ✓", "tgrw": "Награда за подписку!", "tg2": "Награда за подписку уже получена.", "clt": "Список изменений", "clb": "📜 Список изменений", "cln": "Новое", "clf": "Ниже Alpha 3 были минорные изменения, которые не документировались...", "c34a": "Добавлено меню Вывода Средств", "c34b": "Добавлен Список Изменений", "c34c": "Добавлена Синхронизация аккаунтов", "c34d": "Добавлен Телеграм-Канал", "c34e": "Новые Анимации", "c34f": "Прочие исправления", "c33a": "Добавлена Украина и Беларусь", "c33b": "Улучшена Регистрация", "c33c": "Полное переосмысление Белой темы", "c33d": "Возможность играть в долг", "c32a": "Косметические изменения и кастомизация", "c31a": "Добавлены Подарочные коды", "c31b": "Режим Разработчика", "c31c": "Оптимизация", "a7": "Нет связи с сервером синхронизации. Попробуйте позже.", "cpfail": "Не удалось скопировать автоматически. Скопируйте код вручную."});Object.assign(D.en,{"wd": "Withdrawal", "wdamt": "Amount", "wdph": "Phone number", "wdsel": "Choose a bank", "wdmin": "Minimum: {x} (≈ $1)", "wdfee": "Fee {p}%: {f}", "wdget": "You receive: {n}", "wdb": "Withdraw", "wdnote": "Payout in Russian rubles only, at the CBR rate on {d}. After withdrawing you get a code — send it to the administrator.", "wd1": "Amount is below the minimum (from $1 equivalent).", "wd2": "Not enough balance.", "wd3": "Enter a valid phone number.", "wd4": "Choose a bank.", "wdok": "Withdrawal request created", "wdinfo": "{w} was deducted from your balance. Send this code to the administrator: after verification you will be paid {n} at the CBR rate.", "wdcp": "Copy code", "wdchk": "Check withdrawal code", "wdchkph": "Paste the withdrawal code", "wdv": "Check", "wdbad": "Invalid code.", "wr1": "Code is valid", "wra": "Deducted", "wrp": "To pay out", "wri": "Account ID", "wrl": "Login", "wrt": "Phone", "wrk": "Bank", "wrd": "Date", "wrf": "Fee", "wrb": "In database", "wrb1": "found", "wrb0": "not found", "wrpd": "Mark as paid", "wrpd1": "Paid", "tgb": "Join our Telegram channel · +{n}", "tgd": "Telegram channel · reward claimed ✓", "tgrw": "Subscription reward!", "tg2": "The subscription reward was already claimed.", "clt": "Changelog", "clb": "📜 Changelog", "cln": "New", "clf": "Before Alpha 3 there were minor changes that were not documented...", "c34a": "Added the Withdrawal menu", "c34b": "Added the Changelog", "c34c": "Added account Sync", "c34d": "Added the Telegram Channel", "c34e": "New animations", "c34f": "Other fixes", "c33a": "Added Ukraine and Belarus", "c33b": "Improved Registration", "c33c": "Complete redesign of the Light theme", "c33d": "Ability to play on credit", "c32a": "Cosmetic changes and customization", "c31a": "Added Gift codes", "c31b": "Developer Mode", "c31c": "Optimization", "a7": "No connection to the sync server. Try again later.", "cpfail": "Could not copy automatically. Copy the code manually."});Object.assign(D.be,{"wd": "Вывад сродкаў", "wdamt": "Сума вываду", "wdph": "Нумар тэлефона", "wdsel": "Абярыце банк", "wdmin": "Мінімум: {x} (≈ 1 $)", "wdfee": "Камісія {p}%: {f}", "wdget": "Да выплаты: {n}", "wdb": "Вывесці", "wdnote": "Выплата толькі ў расійскіх рублях па курсе ЦБ РФ на {d}. Пасля вываду вы атрымаеце код — яго трэба даслаць адміністратару.", "wd1": "Сума меншая за мінімальную (ад 1 $ у эквіваленце).", "wd2": "Недастаткова сродкаў на балансе.", "wd3": "Увядзіце карэктны нумар тэлефона.", "wd4": "Абярыце банк.", "wdok": "Заяўка на вывад створана", "wdinfo": "З балансу спісана {w}. Дашліце гэты код адміністратару: пасля праверкі вам выплацяць {n} па курсе ЦБ РФ.", "wdcp": "Капіраваць код", "wdchk": "Праверка кода вываду", "wdchkph": "Устаўце код вываду", "wdv": "Праверыць", "wdbad": "Код несапраўдны.", "wr1": "Код сапраўдны", "wra": "Спісана", "wrp": "Да выплаты", "wri": "ID акаўнта", "wrl": "Лагін", "wrt": "Тэлефон", "wrk": "Банк", "wrd": "Дата", "wrf": "Камісія", "wrb": "У базе", "wrb1": "знойдзены", "wrb0": "не знойдзены", "wrpd": "Адзначыць выплачаным", "wrpd1": "Выплачана", "tgb": "Падпісацца на Telegram-канал · +{n}", "tgd": "Telegram-канал · узнагарода атрымана ✓", "tgrw": "Узнагарода за падпіску!", "tg2": "Узнагарода за падпіску ўжо атрымана.", "clt": "Спіс змяненняў", "clb": "📜 Спіс змяненняў", "cln": "Новае", "clf": "Ніжэй за Alpha 3 былі нязначныя змены, якія не дакументаваліся...", "c34a": "Дададзена меню Вываду Сродкаў", "c34b": "Дададзены Спіс Змяненняў", "c34c": "Дададзена Сінхранізацыя акаўнтаў", "c34d": "Дададзены Тэлеграм-Канал", "c34e": "Новыя Анімацыі", "c34f": "Іншыя выпраўленні", "c33a": "Дададзены Украіна і Беларусь", "c33b": "Палепшана Рэгістрацыя", "c33c": "Поўнае пераасэнсаванне Белай тэмы", "c33d": "Магчымасць гуляць у доўг", "c32a": "Касметычныя змены і кастамізацыя", "c31a": "Дададзены Падарункавыя коды", "c31b": "Рэжым Распрацоўшчыка", "c31c": "Аптымізацыя", "a7": "Няма сувязі з серверам сінхранізацыі. Паспрабуйце пазней.", "cpfail": "Не атрымалася скапіяваць аўтаматычна. Скапіюйце код уручную."});Object.assign(D.uk,{"wd": "Виведення коштів", "wdamt": "Сума виведення", "wdph": "Номер телефону", "wdsel": "Оберіть банк", "wdmin": "Мінімум: {x} (≈ 1 $)", "wdfee": "Комісія {p}%: {f}", "wdget": "До виплати: {n}", "wdb": "Вивести", "wdnote": "Виплата лише в російських рублях за курсом ЦБ РФ на {d}. Після виведення ви отримаєте код — його потрібно надіслати адміністратору.", "wd1": "Сума менша за мінімальну (від 1 $ в еквіваленті).", "wd2": "Недостатньо коштів на балансі.", "wd3": "Введіть коректний номер телефону.", "wd4": "Оберіть банк.", "wdok": "Заявку на виведення створено", "wdinfo": "З балансу списано {w}. Надішліть цей код адміністратору: після перевірки вам виплатять {n} за курсом ЦБ РФ.", "wdcp": "Копіювати код", "wdchk": "Перевірка коду виведення", "wdchkph": "Вставте код виведення", "wdv": "Перевірити", "wdbad": "Код недійсний.", "wr1": "Код дійсний", "wra": "Списано", "wrp": "До виплати", "wri": "ID акаунта", "wrl": "Логін", "wrt": "Телефон", "wrk": "Банк", "wrd": "Дата", "wrf": "Комісія", "wrb": "У базі", "wrb1": "знайдено", "wrb0": "не знайдено", "wrpd": "Позначити виплаченим", "wrpd1": "Виплачено", "tgb": "Підписатися на Telegram-канал · +{n}", "tgd": "Telegram-канал · нагороду отримано ✓", "tgrw": "Нагорода за підписку!", "tg2": "Нагороду за підписку вже отримано.", "clt": "Список змін", "clb": "📜 Список змін", "cln": "Нове", "clf": "Нижче Alpha 3 були незначні зміни, які не документувалися...", "c34a": "Додано меню Виведення Коштів", "c34b": "Додано Список Змін", "c34c": "Додано Синхронізацію акаунтів", "c34d": "Додано Телеграм-Канал", "c34e": "Нові Анімації", "c34f": "Інші виправлення", "c33a": "Додано Україну та Білорусь", "c33b": "Покращено Реєстрацію", "c33c": "Повне переосмислення Білої теми", "c33d": "Можливість грати в борг", "c32a": "Косметичні зміни та кастомізація", "c31a": "Додано Подарункові коди", "c31b": "Режим Розробника", "c31c": "Оптимізація", "a7": "Немає зв’язку із сервером синхронізації. Спробуйте пізніше.", "cpfail": "Не вдалося скопіювати автоматично. Скопіюйте код вручну."});
 var TR={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'yo',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'shch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
 function tr(s){return s.replace(/[А-Яа-яЁё]/g,function(ch){var l=ch.toLowerCase(),r=TR[l];return ch!==l&&r?r[0].toUpperCase()+r.slice(1):r})}
 
@@ -307,7 +369,7 @@ function shake(d){d.classList.remove('shk');void d.offsetWidth;d.classList.add('
 /* аккаунты: ключ и формат стабильны между версиями (v — версия схемы) */
 var AK='sdr-casino-accounts',ACC={v:1,users:{},cur:null},user=null,GS=null,am=0;
 try{var A0=JSON.parse(LS.getItem(AK)||'null');if(A0&&A0.users)ACC=A0}catch(e){}
-function wr(){try{LS.setItem(AK,JSON.stringify(ACC))}catch(e){}}
+function wr(){try{LS.setItem(AK,JSON.stringify(ACC))}catch(e){}if(user)pushSoon(user)}
 function hash(s){var u=new TextEncoder().encode(s);return window.crypto&&crypto.subtle?crypto.subtle.digest('SHA-256',u).then(function(b){return [].map.call(new Uint8Array(b),function(x){return x.toString(16).padStart(2,'0')}).join('')}):Promise.resolve('')}
 function ld(d){st.bal=BigInt(d.bal);st.bet=BigInt(d.bet);st.spins=+d.spins||0;st.won=BigInt(d.won);st.lost=BigInt(d.lost||0);if(d.cur&&RATE[d.cur])st.cur=d.cur;fix()}
 GS={bal:st.bal,bet:st.bet,spins:st.spins,won:st.won,lost:st.lost,cur:st.cur};
@@ -330,7 +392,9 @@ function parse(v){var t=String(v).replace(/[\s\u00a0]/g,'').replace(',','.');var
 function T(k,v){var l=st.lang,s=(l==='ru'||l==='rus')?D.ru[k]:(l==='en'&&D.en[k]!==undefined)?D.en[k]:((l==='be'||l==='uk')?(D[l][k]!==undefined?D[l][k]:D.ru[k]):tr(D.ru[k]));
 return s.replace(/\{(\w)\}/g,function(_,n){var x=v&&v[n];return typeof x==='bigint'?moneyBase(x):String(x)})}
 function say(k,v,c){lastMsg={k:k,v:v,c:c};paint()}
-function paint(){var m=$('msg');m.textContent=T(lastMsg.k==='m0'&&!user?'m13':lastMsg.k,lastMsg.v);m.className='msg '+lastMsg.c}
+var lastPaint=null;
+function paint(){var m=$('msg'),c='msg '+lastMsg.c,nw=lastMsg!==lastPaint;m.textContent=T(lastMsg.k==='m0'&&!user?'m13':lastMsg.k,lastMsg.v);
+if(nw){lastPaint=lastMsg;m.className=c;void m.offsetWidth;m.className=c+' an'}else if(!m.classList.contains('an'))m.className=c+' an'}
 
 /* звук */
 var AC=null,master=null;
@@ -384,11 +448,11 @@ root.lang={ru:'ru',en:'en',us:'ru-Latn',rus:'ru',be:'be',uk:'uk'}[st.lang];docum
 document.querySelectorAll('[data-t]').forEach(function(e){e.textContent=T(e.dataset.t)});
 document.querySelectorAll('[data-al]').forEach(function(e){e.setAttribute('aria-label',T(e.dataset.al))});
 document.querySelectorAll('.opt').forEach(function(b){var k=b.dataset.g,id=b.dataset.id;b.lastChild.textContent=k==='cur'?T(CK[id])+' '+id:k==='reg'?T('r'+id):LN[id]});
-document.querySelectorAll('[data-ph]').forEach(function(e){e.placeholder=T(e.dataset.ph)});$('ratesel').textContent=T('rates',{a:(Number(RATE['₽'])/Number(K)).toFixed(4),b:CBR.u.toFixed(4),c:CBR.e.toFixed(4),d:CBR.d,e:CBR.h.toFixed(4),f:CBR.b.toFixed(4)});fillReg();setTab(am);
+document.querySelectorAll('[data-ph]').forEach(function(e){e.placeholder=T(e.dataset.ph)});$('ratesel').textContent=T('rates',{a:(Number(RATE['₽'])/Number(K)).toFixed(4),b:CBR.u.toFixed(4),c:CBR.e.toFixed(4),d:CBR.d,e:CBR.h.toFixed(4),f:CBR.b.toFixed(4)});fillReg();setTab(am);wdInit();clRender();
 buildPay()}
 
 function render(){
-$('bal').textContent=moneyBase(st.bal);
+showBal();
 $('sub').textContent=T('sub',{x:money(minBet())});
 $('bet').value=plain(st.bet);
 $('curl').textContent=st.cur;$('cursym').textContent=st.cur;$('curflag').innerHTML=CF[st.cur];
@@ -397,7 +461,7 @@ $('vol').value=st.vol;$('snd').textContent=T(st.mute?'soff':'son');
 var d=eff()==='dark';$('theme').textContent=d?'☀️':'🌙';$('theme').setAttribute('aria-label',T(d?'toL':'toD'));
 document.querySelectorAll('.opt').forEach(function(b){var on=st[b.dataset.g]===b.dataset.id;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
 $('who').textContent=user?'👤 '+ACC.users[user].n:T('guest');$('accbtn').innerHTML=(user&&bdg(ACC.users[user])?esc(bdg(ACC.users[user]))+' ':'')+(user?avh(ACC.users[user],'xs')+' <span>'+esc(ACC.users[user].n)+'</span>':'👤');$('accbtn').classList.toggle('dev',dok);$('addc').hidden=!dok;$('rstc').hidden=!dok;
-paint();save()}
+paint();wdUpd();tgUpd();save()}
 function eff(){return root.getAttribute('data-theme')==='light'?'light':'dark'}
 function setBet(c){st.bet=c<minBet()?minBet():c>CAPC?CAPC:c;render()}
 function pickFill(){var a=ids(),t=0;a.forEach(function(i){t+=sw(i)});var r=Math.random()*t;for(var k=0;k<a.length;k++){r-=sw(a[k]);if(r<0)return a[k]}return 0}
@@ -410,12 +474,17 @@ $('dbl').onclick=function(){SND.click();setBet(st.bet*2n)};
 $('max').onclick=function(){SND.click();setBet(st.bal>0n?st.bal/R():minBet())};
 $('bet').onchange=function(){setBet(parse(this.value))};
 $('bet').onkeydown=function(e){if(e.key==='Enter'){setBet(parse(this.value));spin()}};
-$('theme').onclick=function(){var n=eff()==='dark'?'light':'dark';root.setAttribute('data-theme',n);try{LS.setItem('ponaroshku-theme',n)}catch(e){}SND.click();render()};
+$('theme').onclick=function(){var n=eff()==='dark'?'light':'dark',btn=this;
+function go(){root.setAttribute('data-theme',n);try{LS.setItem('ponaroshku-theme',n)}catch(e){}render()}
+SND.click();
+if(document.startViewTransition&&!fast){var r=btn.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,rad=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+var vt=document.startViewTransition(go);vt.ready.then(function(){root.animate({clipPath:['circle(0px at '+x+'px '+y+'px)','circle('+rad+'px at '+x+'px '+y+'px)']},{duration:650,easing:'ease-in-out',pseudoElement:'::view-transition-new(root)'})}).catch(function(){})}
+else{root.classList.add('tt');go();setTimeout(function(){root.classList.remove('tt')},600)}};
 function addMoney(c){if(!dok)return;
 if(c<=0n){say('m7',null,'e');SND.err();return}
 var b=c*R(),n=st.bal+b,cb=CAPC*R();SND.click();
 if(n>=cb){st.bal=cb;say('m8',{w:cb},'w')}else{st.bal=n;say('m9',{w:b},'w')}
-render()}
+fly('+'+moneyBase(b),$('addc'));render()}
 document.querySelectorAll('[data-add]').forEach(function(b){b.onclick=function(){addMoney(BigInt(b.dataset.add)*100n)}});
 $('addbtn').onclick=function(){addMoney(parse($('amt').value))};
 var rT;$('reset').onclick=function(){if(busy||!dok)return;var b=this;if(!b.dataset.arm){b.dataset.arm=1;b.textContent=T('rsure');clearTimeout(rT);rT=setTimeout(function(){delete b.dataset.arm;b.textContent=T('reset')},3000);return}
@@ -456,20 +525,21 @@ else if(sy(a).c===sy(b).c&&sy(b).c===sy(c).c){win=bet;hit=[0,1,2];say('m11',{w:w
 else{say('m2',null,'l');SND.lose()}
 var wb=win*Rs,cb=CAPC*Rs;if(wb<bet*Rs)st.lost+=bet*Rs-wb;
 if(win>0n){st.bal=st.bal+wb>cb?cb:st.bal+wb;st.won+=wb;hit.forEach(function(i){reels[i].classList.add('hit')})}
-busy=false;$('spin').disabled=false;render();
-if(kind==='pair')SND.pair();else if(kind==='win')SND.win();else if(kind==='big'||kind==='mega'){SND[kind==='mega'?'jack':'win']();jackpot(kind,wb)}
+if(win>0n)balHold=performance.now()+(kind==='mega'?6900:kind==='big'?4900:900);
+busy=false;$('spin').disabled=false;render();if(win>0n&&(kind==='pair'||kind==='win'))fly('+'+moneyBase(wb),$('reels'));
+if(kind==='pair')SND.pair();else if(kind==='win')SND.win();else if(kind==='big'||kind==='mega'){SND[kind==='mega'?'jack':'win']();jpCb=function(){fly('+'+moneyBase(wb),$('machine'))};jackpot(kind,wb)}
 if(win===0n){if(st.bal<0n)say('m15',{w:st.bal},'e');else if(st.bal<minBet()*Rs)say('m5',null,'e');else if(st.bal<bet*Rs)say('m16',null,'e')}}
 
 /* джекпот */
 var jpTimer=null;
-function hideJp(){$('jp').hidden=true;clearTimeout(jpTimer)}
+var jpCb=null;function hideJp(){$('jp').hidden=true;clearTimeout(jpTimer);if(jpCb){var f=jpCb;jpCb=null;f()}}
 $('jp').onclick=hideJp;
-function jackpot(kind,wb){
-var m=$('machine');$('jpt').innerHTML='<b>'+T(kind==='mega'?'jk':'bw')+'</b><span>'+moneyBase(wb)+'</span>';
+function jackpot(kind,wb,tk,dur){
+var m=$('machine');$('jpt').innerHTML='<b>'+T(tk||(kind==='mega'?'jk':'bw'))+'</b><span>'+moneyBase(wb)+'</span>';
 $('jp').className='jp '+kind;$('jp').hidden=false;
 m.classList.remove('shake','glow');void m.offsetWidth;m.classList.add(kind==='mega'?'shake':'glow');
 if(!fast)burst(kind);
-clearTimeout(jpTimer);jpTimer=setTimeout(hideJp,kind==='mega'?6000:4000)}
+clearTimeout(jpTimer);jpTimer=setTimeout(hideJp,dur||(kind==='mega'?6000:4000))}
 function burst(kind){
 var c=$('cv'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
 var P=[],cols=['#ffd24d','#ff5f6d','#6fe3b0','#5fa8ff','#c77dff','#fff'],n=kind==='mega'?230:90;
@@ -492,7 +562,9 @@ function mkcode(cents,ci,ng){var v=ci*4294967296+cents,n=Math.floor(Math.random(
 function gval(c){if(GC[c]!=null)return BigInt(GC[c])*100n*RATE['$'];var m=/^GIFT-([A-Z2-9]{4})-([A-Z2-9]{4})-([A-Z2-9]{4})-([A-Z2-9]{4})$/.exec(c);if(!m)return 0n;var b=m[1]+m[2]+m[3]+m[4],v=dec(b.slice(0,7)),n=dec(b.slice(7,9)),k=dec(b.slice(9));if(v<0||n<0)return 0n;var ng=k===gchk(v,n,true);if(k!==gchk(v,n)&&!ng)return 0n;var ci=Math.floor(v/4294967296),cents=v%4294967296;if(ci>5||cents<1||cents>3355443100)return 0n;var rr0=BigInt(cents)*RATE[CI[ci]];return ng?-rr0:rr0}
 function fnv(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 function dec(s){var v=0;for(var i=0;i<s.length;i++){var x=GL.indexOf(s[i]);if(x<0)return -1;v=v*32+x}return v}
-function cp(t){try{navigator.clipboard.writeText(t).catch(function(){})}catch(e){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(_){}x.remove()}toast(T('copied'))}
+function cp(t){function fb2(){var h=document.querySelector('dialog[open]')||document.body,x=document.createElement('textarea'),r=false;x.value=t;x.setAttribute('readonly','');x.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px';h.appendChild(x);x.focus();x.select();try{x.setSelectionRange(0,t.length)}catch(e){}try{r=document.execCommand('copy')}catch(e){}x.remove();return r}
+function okk(){toast(T('copied'))}function no(){try{window.prompt(T('cpfail'),t)}catch(e){toast(T('cpfail'))}}
+if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(okk,function(){fb2()?okk():no()})}else{fb2()?okk():no()}}
 function redeem(){var c=$('gin').value.toUpperCase().replace(/\s/g,''),g=$('giftc');
 if(!c){say('g4',null,'e');return}
 if(!user){need('m13');return}
@@ -500,7 +572,7 @@ var a=gval(c),U=ACC.users[user],L=U.g||(U.g=[]);
 if(!a){say('g3',null,'e');SND.err();shake(g);return}
 if(L.indexOf(c)>=0){say('g2',null,'e');SND.err();shake(g);return}
 L.push(c);var b=a,n=st.bal+b,cb=CAPC*R();st.bal=n>cb?cb:n<-DEBTC?-DEBTC:n;
-$('gin').value='';say(b<0n?'g5':'g1',{w:b<0n?-b:b},b<0n?'e':'w');if(b<0n)SND.lose();else SND.win();g.classList.remove('okf');void g.offsetWidth;g.classList.add('okf');wr();render()}
+$('gin').value='';say(b<0n?'g5':'g1',{w:b<0n?-b:b},b<0n?'e':'w');if(b<0n)SND.lose();else SND.win();g.classList.remove('okf');void g.offsetWidth;g.classList.add('okf');if(b>0n)fly('+'+moneyBase(b),g);wr();render()}
 $('gbtn').onclick=redeem;$('gin').onkeydown=function(e){if(e.key==='Enter')redeem()};
 
 /* аккаунты: интерфейс */
@@ -521,23 +593,27 @@ function setTab(m){am=m;document.querySelectorAll('#tabs button').forEach(functi
 function openAcc(){if(!$('acc').open){adding=false;editing=false;$('acc').showModal()}aview()}
 function aview(){var g=!user||adding;$('aguest').hidden=!g;$('auser').hidden=g;$('aback').hidden=!(user&&adding);$('at').textContent=T('acct');$('acc').classList.toggle('dev',dok);if(g)setTab(am);else uview()}
 function aerr(k){$('aerr').textContent=T(k);shake($('acc'));SND.err()}
-function swapTo(k){user=k;ACC.cur=k;ld(ACC.users[k].d);applyDev();wr();applyLang();rr();render()}
-function auth(){var l=$('al').value.trim(),p=$('ap').value,k=l.toLowerCase(),u=ACC.users[k],b=$('asub');
-if(!l||!p)return aerr('a1');if(am&&!/^[A-Za-z0-9]+$/.test(l))return aerr('a5');if(am&&!$('areg').value)return aerr('a6');if(am&&u)return aerr('a2');if(!am&&!u)return aerr('a3');
+function swapTo(k){user=k;ACC.cur=k;ld(ACC.users[k].d);applyDev();balShown=null;wr();sub(k);applyLang();rr();render()}
+function auth(){var l=$('al').value.trim(),p=$('ap').value,k=l.toLowerCase(),b=$('asub');
+if(!l||!p)return aerr('a1');if(am&&!/^[A-Za-z0-9]+$/.test(l))return aerr('a5');if(am&&!$('areg').value)return aerr('a6');if(am&&ACC.users[k])return aerr('a2');
 if(user&&ACC.list.indexOf(k)<0&&ACC.list.length>=2&&!dok)return aerr('lim');
 b.classList.add('ld');
-hash(k+'|'+p).then(function(h){b.classList.remove('ld');
-if(!am&&u.h!==h)return aerr('a3');
-var first=!user;
-if(am)u=ACC.users[k]={n:l,h:h,d:dnew(),id:newId($('areg').value),reg:$('areg').value};
+function bad(c){b.classList.remove('ld');aerr(c)}
+function fin(U){b.classList.remove('ld');var first=!user;ACC.users[k]=U;
 if(first)GS={bal:0n,bet:100n,spins:0,won:0n,lost:0n,cur:st.cur};else save();
 if(ACC.list.indexOf(k)<0)ACC.list.push(k);
-swapTo(k);
-b.classList.add('ok');b.textContent='✓';SND.win();
-setTimeout(function(){b.classList.remove('ok');adding=false;$('al').value=$('ap').value=$('areg').value='';$('acc').close();toast(T('welcome',{n:u.n}))},700)})}
+swapTo(k);b.classList.add('ok');b.textContent='✓';SND.win();
+setTimeout(function(){b.classList.remove('ok');adding=false;$('al').value=$('ap').value=$('areg').value='';$('acc').close();toast(T('welcome',{n:U.n}))},700)}
+Promise.all([hash(k+'|'+p),fb()]).then(function(r){var h=r[0],db=r[1],L=ACC.users[k],ref=db&&db.collection('accounts').doc(k);
+if(am){if(!db)return bad('a7');var U0={n:l,h:h,d:dnew(),id:newId($('areg').value),reg:$('areg').value,t:Date.now()};
+return db.runTransaction(function(tx){return tx.get(ref).then(function(s){if(s.exists)throw 'taken';tx.set(ref,cl(U0))})}).then(function(){LP[k]=sig(U0);SY[k]=true;fin(U0)},function(e){bad(e==='taken'?'a2':'a7')})}
+if(!db){if(L&&L.h===h)return fin(L);return bad(L?'a3':'a7')}
+return ref.get().then(function(s){
+if(!s.exists){if(L&&L.h===h){L.t=Date.now();return ref.set(cl(L)).then(function(){LP[k]=sig(L);SY[k]=true;fin(L)})}return bad('a3')}
+var R=s.data();if(R.h!==h)return bad('a3');fin(L&&L.h===h&&(L.t||0)>(R.t||0)?L:R)},function(){if(L&&L.h===h)fin(L);else bad('a7')})}).catch(function(){bad('a7')})}
 function logout(){save();var k=user;ACC.list=ACC.list.filter(function(x){return x!==k});
 if(ACC.list.length){swapTo(ACC.list[0]);toast(T('bye'));aview()}
-else{var g=GS;st.bal=g.bal;st.bet=g.bet;st.spins=g.spins;st.won=g.won;st.lost=g.lost||0n;if(g.cur)st.cur=g.cur;user=null;ACC.cur=null;applyDev();fix();wr();$('acc').close();toast(T('bye'));applyLang();rr();render()}}
+else{var g=GS;st.bal=g.bal;st.bet=g.bet;st.spins=g.spins;st.won=g.won;st.lost=g.lost||0n;if(g.cur)st.cur=g.cur;user=null;ACC.cur=null;applyDev();fix();balShown=null;wr();sub(null);$('acc').close();toast(T('bye'));applyLang();rr();render()}}
 function uview(){var U=ACC.users[user],h='';
 h+='<div class="prof">'+avh(U,'lg')+'<div><p class="big" style="text-align:left;margin:0">'+esc(U.n)+(bdg(U)?' '+esc(bdg(U)):'')+'</p><span class="cls'+(U.dev?' d':'')+'">'+T(U.dev?'cdev':'cnorm')+'</span><p class="cls" style="margin:2px 0 0">ID: <b>'+esc(U.id||'')+'</b></p></div></div>';
 h+='<p class="sub" style="margin:10px 0">'+T('stats',{n:st.spins,w:st.won,l:st.lost})+'</p><p class="lbl" style="margin-top:12px">'+T('accs')+'</p>';
@@ -561,9 +637,11 @@ if(editing)$('esv').onclick=function(){var U=ACC.users[user],nn=$('en').value.tr
 function er(k){$('eerr').textContent=T(k);shake($('acc'));SND.err()}
 if(!nn)return er('a1');if(nn!==U.n&&!/^[A-Za-z0-9]+$/.test(nn))return er('a5');if(!cp)return er('a4');if(nk!==ok&&ACC.users[nk])return er('a2');
 hash(ok+'|'+cp).then(function(h){if(h!==U.h)return er('wrongp');
-hash(nk+'|'+(np||cp)).then(function(h2){U.h=h2;U.n=nn;
-if(nk!==ok){delete ACC.users[ok];ACC.users[nk]=U;ACC.list=ACC.list.map(function(x){return x===ok?nk:x});if(ACC.cur===ok)ACC.cur=nk;user=nk}
-editing=false;wr();SND.win();toast(T('saved'));render();uview()})})}}
+hash(nk+'|'+(np||cp)).then(function(h2){
+function fin(){U.h=h2;U.n=nn;if(nk!==ok){delete ACC.users[ok];ACC.users[nk]=U;ACC.list=ACC.list.map(function(x){return x===ok?nk:x});if(ACC.cur===ok)ACC.cur=nk;user=nk;SY[nk]=true;sub(nk)}editing=false;wr();SND.win();toast(T('saved'));render();uview()}
+if(nk===ok)return fin();
+fb().then(function(db){if(!db)return er('a7');var nr=db.collection('accounts').doc(nk),orf=db.collection('accounts').doc(ok);
+return db.runTransaction(function(tx){return tx.get(nr).then(function(s){if(s.exists)throw 'taken';var C=cl(U);C.h=h2;C.n=nn;C.t=Date.now();tx.set(nr,C);tx.delete(orf)})}).then(fin,function(e){er(e==='taken'?'a2':'a7')})})})})}}
 $('accbtn').onclick=function(){SND.click();openAcc()};
 $('aclose').onclick=function(){$('acc').close()};
 $('asub').onclick=auth;$('aback').onclick=function(){adding=false;aview()};$('rcb').onclick=restore;
@@ -618,11 +696,125 @@ b.querySelectorAll('[data-cp]').forEach(function(e){e.onclick=function(){cp(e.da
 b.querySelectorAll('.us').forEach(function(e){e.onclick=function(){var r=e.parentNode,k=r.dataset.u,U2=ACC.users[k],id=r.querySelector('.ui').value.trim().toUpperCase(),ev=r.querySelector('.ue').value.trim(),em=ev?g1(ev):'',bad=function(m){toast(T(m));shake($('dev'));SND.err()};
 if(!/^[A-Z0-9]{8,10}$/.test(id)||/[<>&"']/.test(em))return bad('idbad');
 for(var q in ACC.users)if(q!==k&&ACC.users[q].id===id)return bad('idtaken');
-U2.id=id;U2.em=em;wr();SND.click();toast(T('saved'));render()}});
+U2.id=id;U2.em=em;wr();push(k,true);SND.click();toast(T('saved'));render()}});
 $('gmk').onclick=function(){var cn=Number(parse($('gam').value)),ci=CI.indexOf(gcv);if(!(cn>=1&&cn<=3355443100)){shake($('dev'));SND.err();return}var ng=$('gneg').checked,c=mkcode(cn,ci,ng);DV.gen.push({c:c,t:(ng?'−':'+')+fmt(BigInt(cn))+' '+gcv});if(DV.gen.length>50)DV.gen.shift();dsave();cp(c);drender()};
 $('drst').onclick=function(){var k=user;DV.w={};DV.pf=null;DV.cu=[];DV.cb=[];DV.gen=[];if(DV.u[k]!=null){st.bal=BigInt(DV.u[k]);delete DV.u[k]}rr();dsave();render();drender();buildPay();toast('✓');SND.click()}}
 $('devbtn').onclick=function(){SND.click();$('dlg').close();if(!user){need('m13');return}$('dev').showModal();drender()};
 $('dclose').onclick=function(){$('dev').close()};
+
+
+/* ===== Alpha 3.4: Firebase-синхронизация, вывод, Telegram, анимации, список изменений ===== */
+var FBC={apiKey:"AIzaSyC6kQ87seWCmJgMi3EnH9Rsp8fbuVQrNTo",authDomain:"bonusdrop-c9647.firebaseapp.com",projectId:"bonusdrop-c9647",storageBucket:"bonusdrop-c9647.firebasestorage.app",messagingSenderId:"953859162910",appId:"1:953859162910:web:0d0553676db086dd7d7f0f",measurementId:"G-QLNLHBLMBK"};
+var DBP=null,unsub=null,SY={},LP={},pTm=null;
+function fb(){if(DBP)return DBP;DBP=new Promise(function(res){var dn=false;function fin(v){if(!dn){dn=true;res(v)}}
+function sc(u,cb){var s=document.createElement('script');s.src=u;s.onload=cb;s.onerror=function(){fin(null)};document.head.appendChild(s)}
+if(window.firebase&&firebase.apps&&firebase.apps.length)fin(firebase.firestore());
+else sc('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',function(){sc('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',function(){try{firebase.initializeApp(FBC);var d=firebase.firestore();try{d.settings({experimentalAutoDetectLongPolling:true,merge:true})}catch(e){}fin(d)}catch(e){fin(null)}})});
+setTimeout(function(){fin(null)},12000)});
+DBP.then(function(d){if(!d)DBP=null});return DBP}
+function cl(U){var c=JSON.parse(JSON.stringify(U));delete c.cf;return c}
+function cj(o){if(Array.isArray(o))return '['+o.map(cj).join(',')+']';if(o&&typeof o==='object')return '{'+Object.keys(o).sort().map(function(k){return JSON.stringify(k)+':'+cj(o[k])}).join(',')+'}';return JSON.stringify(o)}
+function sig(U){var c=cl(U);delete c.t;return cj(c)}
+function pushSoon(k){clearTimeout(pTm);pTm=setTimeout(function(){push(k)},1500)}
+function push(k,force){var U=ACC.users[k];if(!U||U.cf)return;if(!force&&!SY[k])return;var s=sig(U);if(!force&&LP[k]===s)return;
+fb().then(function(db){if(!db)return;U.t=Date.now();LP[k]=s;try{LS.setItem(AK,JSON.stringify(ACC))}catch(e){}db.collection('accounts').doc(k).set(cl(U)).catch(function(){LP[k]=null})})}
+function sub(k){if(unsub){try{unsub()}catch(e){}unsub=null}if(!k)return;
+fb().then(function(db){if(!db||ACC.cur!==k)return;unsub=db.collection('accounts').doc(k).onSnapshot(function(s){onRemote(k,s)},function(){})})}
+function onRemote(k,s){var U=ACC.users[k];if(!U)return;
+if(!s.exists){SY[k]=true;push(k,true);return}
+var R=s.data();
+if((R.t||0)>(U.t||0)){if(busy){setTimeout(function(){onRemote(k,s)},700);return}applyRemote(k,R)}
+else if(!SY[k]&&(U.t||0)>(R.t||0)){SY[k]=true;push(k,true)}
+SY[k]=true}
+function applyRemote(k,R){ACC.users[k]=R;LP[k]=sig(R);
+try{LS.setItem(AK,JSON.stringify(ACC))}catch(e){}
+if(k===user){ld(R.d);applyDev();applyLang();render();if($('acc').open&&!adding)aview()}}
+
+/* анимация денег: цифра летит в баланс, баланс плавно «досчитывается» */
+var balShown=null,balAnim=false,balHold=0;
+function showBal(){var el=$('bal');if(balShown===null||fast){balShown=st.bal;el.textContent=moneyBase(balShown);return}
+if(balShown===st.bal&&!balAnim){el.textContent=moneyBase(balShown);return}
+if(st.bal<balShown&&performance.now()>=balHold){balShown=st.bal;el.textContent=moneyBase(balShown);return}
+if(balAnim)return;balAnim=true;var t0=0,from=0n;
+(function f(now){if(now<balHold){requestAnimationFrame(f);return}
+if(!t0){t0=now;from=balShown}
+var p=Math.min(1,(now-t0)/700),e=1-Math.pow(1-p,3),to=st.bal;
+balShown=p>=1?to:from+(to-from)*BigInt(Math.round(e*1000))/1000n;el.textContent=moneyBase(balShown);
+if(p<1)requestAnimationFrame(f);else balAnim=false})(performance.now())}
+function bump(){var b=$('bal');b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')}
+function fly(txt,from){balHold=performance.now()+850;if(fast||!from||from.hidden)return;
+var r=from.getBoundingClientRect(),q=$('bal').getBoundingClientRect(),e=document.createElement('div');e.className='fly';e.textContent=txt;document.body.appendChild(e);
+var x0=r.left+r.width/2,y0=r.top+r.height/2,x1=q.right-Math.min(90,q.width/2),y1=q.top+q.height/2;
+e.animate([{transform:'translate('+x0+'px,'+y0+'px) translate(-50%,-50%) scale(.5)',opacity:0},{transform:'translate('+x0+'px,'+(y0-40)+'px) translate(-50%,-50%) scale(1.25)',opacity:1,offset:.3},{transform:'translate('+x1+'px,'+y1+'px) translate(-50%,-50%) scale(.7)',opacity:.85}],{duration:850,easing:'cubic-bezier(.5,0,.3,1)',fill:'forwards'}).onfinish=function(){e.remove();bump()}}
+
+/* вывод средств */
+var COMM={base:1500};/* базисные пункты: 1500 = 15%. Сюда же добавлять статусы с меньшей комиссией */
+function feeBp(U){return COMM[U&&U.status]||COMM.base}
+var BANKS=[
+{i:'sber',n:'Сбер Банк',e:'Sber Bank',c:'#21a038',r:12,g:'<path d="M6.5 12.5l3.6 3.6 7.4-8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'},
+{i:'tbank',n:'Т-Банк',e:'T-Bank',c:'#ffdd2d',r:6,g:'<path d="M6.5 7.5h11M12 7.5v10.5" stroke="#111" stroke-width="3.2"/>'},
+{i:'alfa',n:'Альфа-Банк',e:'Alfa-Bank',c:'#ef3124',r:6,g:'<text x="12" y="17.5" text-anchor="middle" font-size="15" font-weight="800" fill="#fff" font-family="Arial,sans-serif">А</text>'},
+{i:'yoo',n:'ЮMoney',e:'YooMoney',c:'#8b3ffd',r:12,g:'<text x="12" y="16.5" text-anchor="middle" font-size="13" font-weight="800" fill="#fff" font-family="Arial,sans-serif">Ю</text>'},
+{i:'vtb',n:'ВТБ',e:'VTB',c:'#0a2896',r:6,g:'<text x="12" y="15.2" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" font-family="Arial,sans-serif">ВТБ</text>'},
+{i:'ozon',n:'Озон Банк',e:'Ozon Bank',c:'#005bff',r:12,g:'<circle cx="12" cy="12" r="5" fill="none" stroke="#fff" stroke-width="2.8"/>'}];
+function blg(b){return '<svg class="bl" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="'+b.r+'" fill="'+b.c+'"/>'+b.g+'</svg>'}
+function bnm(b){return st.lang==='en'?b.e:st.lang==='us'?tr(b.n):b.n}
+function bfind(i){return BANKS.filter(function(b){return b.i===i})[0]}
+var wbv='';
+function wdInit(){var o=[{v:'',h:'<span>'+T('wdsel')+'</span>'}].concat(BANKS.map(function(b){return {v:b.i,h:blg(b)+'<span>'+esc(bnm(b))+'</span>'}}));
+$('wbk').innerHTML=cs('wbs',o,wbv);csb($('wbk'),function(id,v){wbv=v})}
+function wdMin(){return (100n*RATE['$']+R()-1n)/R()}
+function fmtR(c){return fmt(c)+'\u00a0₽'}
+function wdCalc(){var a=parse($('wda').value),U=user?ACC.users[user]:null,bp=BigInt(feeBp(U)),base=a*R(),fee=base*bp/10000n,net=base-fee;return {a:a,base:base,fee:fee,net:net,rub:net/RATE['₽']}}
+function wdUpd(){var c=wdCalc(),U=user?ACC.users[user]:null,h='<span>'+T('wdmin',{x:money(wdMin())})+'</span>';
+if(c.a>0n)h+='<span>'+T('wdfee',{p:String(feeBp(U)/100),f:money(c.fee/R())})+'</span><b>'+T('wdget',{n:fmtR(c.rub)})+'</b>';
+$('wds').innerHTML=h;$('wdn').textContent=T('wdnote',{d:CBR.d})}
+function rid(n){var s='';for(var i=0;i<n;i++)s+=GL[Math.floor(Math.random()*32)];return s}
+function b64u(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function ub64(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)))}
+function wsig(p){return fnv('bd|'+p+'|a').toString(16).padStart(8,'0')+fnv('bd|'+p+'|b').toString(16).padStart(8,'0')}
+function wdEnc(w){var p=b64u(JSON.stringify(w));return 'BD1.'+p+'.'+wsig(p)}
+function wdShow(code,w){$('wddt').textContent=T('wdok');$('wddi').textContent=T('wdinfo',{w:BigInt(w.b),n:fmtR(BigInt(w.r))});$('wdcode').value=code;$('wdd').showModal()}
+$('wda').oninput=wdUpd;
+$('wdp').oninput=function(){this.value=this.value.replace(/[^\d+\s()-]/g,'')};
+$('wdb').onclick=function(){if(busy)return;if(!user){need('m13');return}
+var U=ACC.users[user],c=wdCalc(),ph=$('wdp').value.replace(/[^\d+]/g,''),dg=ph.replace(/\D/g,''),bk=$('wbs')?$('wbs').dataset.v:'',m=$('wdm');
+function er(k){m.textContent=T(k);shake($('wdc'));SND.err()}
+if(c.a<wdMin())return er('wd1');if(c.base>st.bal)return er('wd2');if(dg.length<10||dg.length>15)return er('wd3');if(!bk)return er('wd4');
+m.textContent='';
+var w={i:rid(10),u:U.id||'',l:user,a:c.a.toString(),cu:st.cur,b:c.base.toString(),f:feeBp(U),r:c.rub.toString(),p:ph,k:bk,t:Date.now(),x:CBR.u};
+st.bal-=c.base;U.wd=(U.wd||[]).concat([{i:w.i,t:w.t,r:w.r}]).slice(-30);
+var code=wdEnc(w);fb().then(function(db){if(db)db.collection('withdrawals').doc(w.i).set(Object.assign({},w,{paid:false})).catch(function(){})});
+SND.win();$('wda').value='';wr();render();wdShow(code,w)};
+$('wdcp').onclick=function(){cp($('wdcode').value)};$('wdx').onclick=function(){$('wdd').close()};
+$('wdcode').onclick=function(){this.select()};
+/* проверка кода вывода (только аккаунт разработчика) */
+function wdVerify(){var c=$('wvin').value.trim(),o=$('wvr'),p=c.split('.');
+function bad(){o.innerHTML='<b class="bad">'+T('wdbad')+'</b>'}
+if(p.length!==3||p[0]!=='BD1'||p[2]!==wsig(p[1]))return bad();
+var w;try{w=JSON.parse(ub64(p[1]));BigInt(w.b);BigInt(w.r);BigInt(w.a)}catch(e){return bad()}
+function row(l,v){return '<div class="wvr"><span>'+T(l)+'</span><b>'+v+'</b></div>'}
+var bk=bfind(w.k),h='<b class="good">✔ '+T('wr1')+'</b>'+row('wra',esc(fmt(BigInt(w.a))+' '+w.cu))+row('wrf',esc(String(w.f/100))+'%')+row('wrp',esc(fmtR(BigInt(w.r))))+row('wri',esc(w.u))+row('wrl',esc(w.l))+row('wrt',esc(w.p))+row('wrk',bk?blg(bk)+' '+esc(bnm(bk)):esc(w.k))+row('wrd',esc(new Date(w.t).toLocaleString(LOC[st.reg])));
+o.innerHTML=h+'<div id="wvdb"></div>';
+fb().then(function(db){var e=$('wvdb');if(!e)return;if(!db){e.innerHTML=row('wrb','<span class="bad">'+T('wrb0')+'</span>');return}
+db.collection('withdrawals').doc(w.i).get().then(function(s){if(!s.exists){e.innerHTML=row('wrb','<span class="bad">'+T('wrb0')+'</span>');return}
+var paid=!!s.data().paid;e.innerHTML=row('wrb','<span class="good">'+T('wrb1')+'</span>')+(paid?'<b class="good">'+T('wrpd1')+'</b>':'<button id="wvp" style="width:100%;margin-top:8px">'+T('wrpd')+'</button>');
+if(!paid)$('wvp').onclick=function(){db.collection('withdrawals').doc(w.i).update({paid:true}).then(function(){e.innerHTML=row('wrb','<span class="good">'+T('wrb1')+'</span>')+'<b class="good">'+T('wrpd1')+'</b>'})}},function(){e.innerHTML=row('wrb','<span class="bad">'+T('wrb0')+'</span>')})})}
+$('wdchk').onclick=function(){SND.click();$('wvr').innerHTML='';$('wvin').value='';$('wdv').showModal()};
+$('wvb').onclick=wdVerify;$('wvx').onclick=function(){$('wdv').close()};
+/* Telegram */
+var TGURL='https://t.me/bonusdrop_sdr',TGR=1500n*RATE['₽'];
+function tgUpd(){var U=user&&ACC.users[user],d=!!(U&&U.tg);$('tgt').textContent=T(d?'tgd':'tgb',{n:TGR});$('tg').classList.toggle('done',d)}
+$('tg').onclick=function(){try{window.open(TGURL,'_blank','noopener')}catch(e){}
+if(!user){need('m13');return}
+var U=ACC.users[user];if(U.tg){toast(T('tg2'));return}
+U.tg=true;var n=st.bal+TGR,cb=CAPC*R();st.bal=n>cb?cb:n;SND.win();
+balHold=performance.now()+9000;jpCb=function(){fly('+'+moneyBase(TGR),$('tg'))};jackpot('big',TGR,'tgrw',2800);wr();render()};
+/* список изменений */
+var CL=[{v:'3.4',k:['c34a','c34b','c34c','c34d','c34e','c34f']},{v:'3.3',k:['c33a','c33b','c33c','c33d']},{v:'3.2',k:['c32a']},{v:'3.1',k:['c31a','c31b','c31c']}];
+function clRender(){var h='';CL.forEach(function(v,i){h+='<div class="clv" style="--d:'+i*80+'ms"><div class="clh"><b>Alpha '+v.v+'</b>'+(i===0?'<span class="cln">'+T('cln')+'</span>':'')+'</div><ul>'+v.k.map(function(k){return '<li>'+T(k)+'</li>'}).join('')+'</ul></div>'});
+$('clbody').innerHTML=h+'<p class="sub" style="margin-top:10px">'+T('clf')+'</p>'}
+$('clbtn').onclick=function(){SND.click();$('dlg').close();clRender();$('cld').showModal()};$('clx').onclick=function(){$('cld').close()};
 
 $('spin').onclick=spin;
 document.addEventListener('keydown',function(e){
@@ -632,7 +824,7 @@ else if(e.key==='Escape')closeMenu();
 else if(e.key==='ArrowUp'){e.preventDefault();setBet(st.bet+step())}
 else if(e.key==='ArrowDown'){e.preventDefault();setBet(st.bet-step())}
 else if(e.code==='KeyM'){setMute(!st.mute)}});
-setLoc();applyLang();render();
+setLoc();applyLang();render();sub(user);
 try{$('toast').showPopover()}catch(e){}
 })();
 </script>
