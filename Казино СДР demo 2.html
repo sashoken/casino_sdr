@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Казино «Понарошку»</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#efe9f6;--panel:#fff;--ink:#25173a;--mute:#6b5b86;--brass:#9a6b10;--win:#0b8a5a;--lose:#b3263e;--reel:#f6f2fb;--line:#d8cce8;--btn:#25173a;--btnink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--panel:#0b0b0b;--ink:#f2f2f2;--mute:#9a9a9a;--brass:#e6b95c;--win:#6fe3b0;--lose:#ff7d93;--reel:#000;--line:#2a2a2a;--btn:#e6b95c;--btnink:#000}}
+:root[data-theme="dark"]{--bg:#000;--panel:#0b0b0b;--ink:#f2f2f2;--mute:#9a9a9a;--brass:#e6b95c;--win:#6fe3b0;--lose:#ff7d93;--reel:#000;--line:#2a2a2a;--btn:#e6b95c;--btnink:#000}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+main{max-width:520px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:1.5rem;font-weight:800;margin:0}
+h2{margin:0 0 4px;font-size:1.2rem}
+.sub{color:var(--mute);margin:2px 0 12px;font-size:.9rem}
+button,input,select{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:transparent;border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:700;min-height:44px}
+button:hover{border-color:var(--brass)}
+:is(button,input,select):focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+input,select{background:var(--reel);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:44px;width:100%;font-weight:700}
+input{text-align:center;font-variant-numeric:tabular-nums}
+.ctl{display:flex;gap:6px;margin-bottom:12px}
+.ctl>button,.dd>button{background:var(--panel);display:flex;align-items:center;gap:8px}
+.dd{position:relative}
+.menu{position:absolute;z-index:20;top:100%;left:0;margin-top:6px;min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.menu[hidden]{display:none}
+.opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-color:transparent}
+.opt.on{border-color:var(--brass)}
+.flag{width:28px;height:19px;border-radius:3px;flex-shrink:0;box-shadow:0 0 0 1px rgba(128,128,128,.4)}
+.bal{display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+.bal small{color:var(--mute)}
+.bal b{font-size:clamp(1.15rem,6vw,2rem);font-weight:800;color:var(--brass);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.machine{margin:14px 0;background:var(--panel);border:2px solid var(--brass);border-radius:22px;padding:16px}
+.machine.shake{animation:shake .5s 3}
+.machine.glow{animation:glow .8s 5}
+@keyframes shake{25%{transform:translate(-6px,3px) rotate(-.6deg)}75%{transform:translate(6px,-3px) rotate(.6deg)}}
+@keyframes glow{50%{box-shadow:0 0 40px 8px var(--brass)}}
+.reels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.reel{position:relative;overflow:hidden;background:var(--reel);border:2px solid var(--line);border-radius:14px;aspect-ratio:1/1.1;transition:border-color .2s;font-size:clamp(3rem,16vw,4.6rem)}
+.strip{position:absolute;left:0;right:0;top:0;height:100%;display:flex;flex-direction:column}
+.cell{flex:1;display:grid;place-items:center;line-height:1}
+.reel.spin{border-color:var(--brass)}
+.reel.spin .strip{filter:blur(2px)}
+.reel.hit{border-color:var(--win);animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.07)}}
+.msg{min-height:3.2em;text-align:center;margin:12px 0 6px;font-weight:700}
+.msg.w{color:var(--win)}.msg.l{color:var(--mute)}.msg.e{color:var(--lose)}
+.betrow{display:flex;gap:6px;margin-bottom:10px}
+.betrow input{flex:1;min-width:0}
+.spinbtn{width:100%;background:var(--btn);color:var(--btnink);border:0;font-size:1.25rem;padding:14px;border-radius:14px}
+.spinbtn:disabled{opacity:.5;cursor:default}
+.lbl{font-size:.85rem;color:var(--mute);margin:0 0 6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:14px}
+.add{display:flex;gap:6px;flex-wrap:wrap}
+.add input{flex:1 1 90px;width:auto}
+.add .go{background:var(--btn);color:var(--btnink);border:0}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+td{padding:5px 0;border-bottom:1px solid var(--line)}
+td:last-child{text-align:right;font-weight:700;color:var(--brass)}
+tr:last-child td{border:0}
+.foot{display:flex;justify-content:space-between;color:var(--mute);font-size:.85rem;margin-top:14px;gap:8px;flex-wrap:wrap}
+.foot button{min-height:36px;padding:6px 10px;font-weight:500}
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(92vw,420px)}
+dialog::backdrop{background:rgba(0,0,0,.65)}
+.row{margin:14px 0}
+.row .opt{margin-bottom:4px}
+.ver{color:var(--mute);font-size:.85rem;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.jp{position:fixed;inset:0;z-index:50;display:grid;place-items:center;text-align:center;background:rgba(0,0,0,.72);cursor:pointer}
+.jp[hidden]{display:none}
+.jp.mega{animation:flash .6s 6}
+@keyframes flash{50%{background:rgba(120,60,0,.85)}}
+#cv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.jpt{position:relative;display:grid;gap:8px;color:#fff;font-size:1.6rem;font-weight:800;padding:0 16px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.jpt b{font-size:clamp(2.2rem,12vw,4.2rem);background:linear-gradient(90deg,#ff5f6d,#ffc371,#6fe3b0,#5fa8ff,#c77dff,#ff5f6d);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rb 1.2s linear infinite,zoom .7s}
+@keyframes rb{to{background-position:-200% 0}}
+@keyframes zoom{0%{transform:scale(.2);opacity:0}70%{transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.reel.hit,.machine.shake,.machine.glow,.jp.mega,.jpt b{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Казино «Понарошку»</h1>
+<p class="sub">Игровые деньги, настоящих здесь нет. Минимальная ставка — 0,10.</p>
+<div class="ctl">
+<div class="dd"><button id="curbtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Выбор валюты"><span id="curflag"></span><span id="cursym">$</span><span aria-hidden="true">▾</span></button><div class="menu" id="curmenu" role="listbox" hidden></div></div>
+<button id="theme" aria-label="Сменить тему">🌙</button>
+<button id="gear" aria-label="Настройки">⚙️</button>
+</div>
+
+<div class="bal"><small>Баланс</small><b id="bal">0.00</b></div>
+
+<section class="machine" id="machine" aria-label="Игровой автомат">
+<div class="reels" id="reels"><div class="reel"><div class="strip"></div></div><div class="reel"><div class="strip"></div></div><div class="reel"><div class="strip"></div></div></div>
+<div class="msg l" id="msg" role="status" aria-live="polite">Сделайте ставку и крутите.</div>
+<p class="lbl">Ставка, <span id="curl">$</span></p>
+<div class="betrow">
+<button id="minus" aria-label="Уменьшить ставку">−</button>
+<input id="bet" inputmode="decimal" aria-label="Ставка" value="0.10">
+<button id="plus" aria-label="Увеличить ставку">+</button>
+<button id="half">½</button><button id="dbl">×2</button><button id="max">Макс</button>
+</div>
+<button class="spinbtn" id="spin">Крутить</button>
+</section>
+
+<section class="card">
+<p class="lbl">Пополнить баланс</p>
+<div class="add">
+<button data-add="10">+10</button><button data-add="100">+100</button><button data-add="1000">+1000</button>
+<input id="amt" inputmode="decimal" aria-label="Своя сумма" value="500">
+<button class="go" id="addbtn">Пополнить</button>
+</div>
+</section>
+
+<section class="card">
+<p class="lbl">Таблица выплат (множитель ставки)</p>
+<table>
+<tr><td>7️⃣ 7️⃣ 7️⃣ — джекпот</td><td>×100</td></tr>
+<tr><td>💎 💎 💎</td><td>×40</td></tr>
+<tr><td>🔔 🔔 🔔</td><td>×15</td></tr>
+<tr><td>🍋 🍋 🍋</td><td>×8</td></tr>
+<tr><td>🍒 🍒 🍒</td><td>×5</td></tr>
+<tr><td>Любая пара</td><td>×0.7</td></tr>
+</table>
+</section>
+
+<div class="foot">
+<span id="stats">Круток: 0</span>
+<button id="reset">Сбросить до 100</button>
+</div>
+</main>
+
+<dialog id="dlg" aria-labelledby="dt">
+<h2 id="dt">Настройки</h2>
+<div class="row"><p class="lbl">Валюта</p><div id="curopts"></div></div>
+<div class="row"><label class="lbl" for="reg">Регион (формат чисел)</label><select id="reg"></select></div>
+<div class="row"><p class="lbl">Звук</p>
+<button id="snd" style="width:100%;margin-bottom:8px"></button>
+<input type="range" id="vol" min="0" max="100" aria-label="Громкость"></div>
+<div class="ver"><span>Версия: Alpha 1.2</span><button id="close">Закрыть</button></div>
+</dialog>
+
+<div class="jp" id="jp" hidden><canvas id="cv"></canvas><div class="jpt" id="jpt"></div></div>
+
+<script>
+(function(){
+var SYMS=[{e:'🍒',w:32,m:5},{e:'🍋',w:26,m:8},{e:'🔔',w:20,m:15},{e:'💎',w:14,m:40},{e:'7️⃣',w:8,m:100}];
+var MIN=10n,CAP=10n**18n;
+function us(){var s='<svg class="flag" viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#b22234"/>';
+for(var j=1;j<13;j+=2)s+='<rect y="'+j*10/13+'" width="19" height="'+10/13+'" fill="#fff"/>';
+s+='<rect width="7.6" height="5.4" fill="#3c3b6e"/>';
+for(var y=.8;y<5;y+=1)s+='<path d="M.6 '+y+'H7" stroke="#fff" stroke-width=".4" stroke-dasharray="0 1.1" stroke-linecap="round"/>';
+return s+'</svg>'}
+function eu(){var s='<svg class="flag" viewBox="0 0 3 2"><rect width="3" height="2" fill="#039"/>';
+for(var k=0;k<12;k++){var a=k*Math.PI/6;s+='<circle cx="'+(1.5+.62*Math.sin(a)).toFixed(3)+'" cy="'+(1-.62*Math.cos(a)).toFixed(3)+'" r=".09" fill="#fc0"/>'}
+return s+'</svg>'}
+var ru='<svg class="flag" viewBox="0 0 3 3" preserveAspectRatio="none"><rect width="3" height="1" fill="#0bc200"/><rect y="1" width="3" height="1" fill="#cf0000"/><rect y="2" width="3" height="1" fill="#003590"/></svg>';
+var CUR={'$':{n:'Доллар',f:us()},'€':{n:'Евро',f:eu()},'₽':{n:'Рубль',f:ru}};
+var CC='AF AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BY BE BZ BJ BT BO BA BW BR BN BG BF BI CV KH CM CA CF TD CL CN CO KM CG CD CR CI HR CU CY CZ KP DK DJ DM DO EC EG SV GQ ER EE SZ ET FJ FI FR GA GM GE DE GH GR GD GT GN GW GY HT HN HU IS IN ID IR IQ IE IL IT JM JP JO KZ KE KI KW KG LA LV LB LS LR LY LI LT LU MG MW MY MV ML MT MH MR MU MX FM MD MC MN ME MA MZ MM NA NR NP NL NZ NI NE NG MK NO OM PK PW PA PG PY PE PH PL PT QA KR RO RU RW KN LC VC WS SM ST SA SN RS SC SL SG SK SI SB SO ZA SS ES LK SD SR SE CH SY TJ TH TL TG TO TT TN TR TM TV UG UA AE GB TZ US UY UZ VU VE VN YE ZM ZW'.split(' ');
+var st={bal:10000n,bet:10n,spins:0,won:0n,cur:'$',reg:'RU',vol:60,mute:false};
+try{var s=JSON.parse(localStorage.getItem('ponaroshku3')||localStorage.getItem('ponaroshku2')||'null');
+if(s){st.bal=BigInt(s.bal);st.bet=BigInt(s.bet);st.spins=+s.spins||0;st.won=BigInt(s.won);
+if(CUR[s.cur])st.cur=s.cur;if(CC.indexOf(s.reg)>-1)st.reg=s.reg;if(typeof s.vol==='number')st.vol=s.vol;st.mute=!!s.mute}}catch(e){}
+if(st.bal>CAP)st.bal=CAP;if(st.bal<0n)st.bal=0n;if(st.bet<MIN)st.bet=MIN;if(st.bet>CAP)st.bet=CAP;
+var root=document.documentElement;
+try{var th=localStorage.getItem('ponaroshku-theme');if(th==='dark'||th==='light')root.setAttribute('data-theme',th)}catch(e){}
+function save(){try{localStorage.setItem('ponaroshku3',JSON.stringify({bal:st.bal.toString(),bet:st.bet.toString(),spins:st.spins,won:st.won.toString(),cur:st.cur,reg:st.reg,vol:st.vol,mute:st.mute}))}catch(e){}}
+var $=function(id){return document.getElementById(id)};
+var reels=[].slice.call(document.querySelectorAll('.reel'));
+var busy=false,NF,DS;
+function setLoc(){try{NF=new Intl.NumberFormat(new Intl.Locale('und-'+st.reg).maximize().language+'-'+st.reg);DS=NF.formatToParts(1.1).filter(function(p){return p.type==='decimal'})[0].value}catch(e){NF=new Intl.NumberFormat('ru-RU');DS=','}}
+function plain(c){return (c/100n).toString()+'.'+(c%100n).toString().padStart(2,'0')}
+function fmt(c){return NF.format(c/100n)+DS+(c%100n).toString().padStart(2,'0')}
+function money(c){return fmt(c)+'\u00a0'+st.cur}
+function parse(v){var t=String(v).replace(/[\s\u00a0]/g,'').replace(',','.');var m=t.match(/^(\d*)(?:\.(\d*))?$/);if(!m||(!m[1]&&!m[2]))return 0n;return BigInt(m[1]||'0')*100n+BigInt(((m[2]||'')+'00').slice(0,2))}
+function say(t,c){var m=$('msg');m.textContent=t;m.className='msg '+c}
+
+/* звук */
+var AC=null,master=null;
+function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.connect(AC.destination)}catch(e){return null}}
+if(AC.state==='suspended')AC.resume();master.gain.value=st.mute?0:Math.pow(st.vol/100,2);return AC}
+function tone(f,t,d,type,g,f2){var a=audio();if(!a||st.mute||!st.vol)return;var o=a.createOscillator(),v=a.createGain(),s=a.currentTime+(t||0);
+o.type=type||'sine';o.frequency.setValueAtTime(f,s);if(f2)o.frequency.exponentialRampToValueAtTime(f2,s+d);
+v.gain.setValueAtTime(.0001,s);v.gain.exponentialRampToValueAtTime(g||.3,s+.01);v.gain.exponentialRampToValueAtTime(.0001,s+d);
+o.connect(v);v.connect(master);o.start(s);o.stop(s+d+.02)}
+var SND={click:function(){tone(660,0,.06,'triangle',.25)},
+tick:function(){tone(900+Math.random()*250,0,.03,'square',.05)},
+stop:function(){tone(170,0,.16,'sine',.6,60)},
+lose:function(){tone(240,0,.3,'sawtooth',.1,140)},
+err:function(){tone(150,0,.2,'square',.15)},
+pair:function(){[523,659].forEach(function(f,i){tone(f,i*.1,.2,'triangle',.3)})},
+win:function(){[523,659,784,1047].forEach(function(f,i){tone(f,i*.09,.24,'triangle',.35)})},
+jack:function(){for(var i=0;i<20;i++)tone(400+(i%8)*120,i*.07,.22,'square',.14);[523,659,784,1047].forEach(function(f){tone(f,1.45,1.2,'triangle',.3)})}};
+
+/* валюта и меню */
+function buildOpts(el){el.innerHTML='';Object.keys(CUR).forEach(function(k){var b=document.createElement('button');b.className='opt';b.setAttribute('role','option');b.dataset.c=k;
+b.innerHTML=CUR[k].f+'<span>'+CUR[k].n+' '+k+'</span>';b.onclick=function(){st.cur=k;SND.click();closeMenu();render()};el.appendChild(b)})}
+function mark(){document.querySelectorAll('.opt').forEach(function(b){var on=b.dataset.c===st.cur;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)})}
+function closeMenu(){$('curmenu').hidden=true;$('curbtn').setAttribute('aria-expanded','false')}
+$('curbtn').onclick=function(e){e.stopPropagation();var h=$('curmenu').hidden;$('curmenu').hidden=!h;this.setAttribute('aria-expanded',String(h))};
+document.addEventListener('click',function(e){if(!e.target.closest('.dd'))closeMenu()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMenu()});
+buildOpts($('curmenu'));buildOpts($('curopts'));
+
+/* регион */
+var names={};try{var dn=new Intl.DisplayNames(['ru'],{type:'region'});CC.forEach(function(c){names[c]=dn.of(c)})}catch(e){CC.forEach(function(c){names[c]=c})}
+CC.slice().sort(function(a,b){return names[a].localeCompare(names[b],'ru')}).forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=names[c];$('reg').appendChild(o)});
+$('reg').onchange=function(){st.reg=this.value;setLoc();render()};
+$('gear').onclick=function(){SND.click();$('dlg').showModal()};
+$('close').onclick=function(){$('dlg').close()};
+$('snd').onclick=function(){st.mute=!st.mute;render();SND.click()};
+$('vol').oninput=function(){st.vol=+this.value;if(st.vol>0&&st.mute)st.mute=false;render()};
+$('vol').onchange=function(){SND.click()};
+
+function render(){
+$('bal').textContent=money(st.bal);
+$('bet').value=plain(st.bet);
+$('curl').textContent=st.cur;$('cursym').textContent=st.cur;$('curflag').innerHTML=CUR[st.cur].f;
+$('stats').textContent='Круток: '+st.spins+' · выиграно: '+money(st.won);
+$('reg').value=st.reg;$('vol').value=st.vol;
+$('snd').textContent=st.mute?'🔇 Звук выключен':'🔊 Звук включён';
+mark();save();
+}
+function setBet(c){st.bet=c<MIN?MIN:c>CAP?CAP:c;render()}
+function pick(){var r=Math.random()*100,a=0;for(var i=0;i<SYMS.length;i++){a+=SYMS[i].w;if(r<a)return i}return 0}
+function step(){return st.bet<100n?10n:st.bet<1000n?100n:1000n}
+$('minus').onclick=function(){SND.click();setBet(st.bet-step())};
+$('plus').onclick=function(){SND.click();setBet(st.bet+step())};
+$('half').onclick=function(){SND.click();setBet(st.bet/2n)};
+$('dbl').onclick=function(){SND.click();setBet(st.bet*2n)};
+$('max').onclick=function(){SND.click();setBet(st.bal)};
+$('bet').onchange=function(){setBet(parse(this.value))};
+function eff(){return root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}
+function themeBtn(){var d=eff()==='dark';$('theme').textContent=d?'☀️':'🌙';$('theme').setAttribute('aria-label',d?'Включить светлую тему':'Включить тёмную тему')}
+$('theme').onclick=function(){var n=eff()==='dark'?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem('ponaroshku-theme',n)}catch(e){}themeBtn();SND.click()};
+function addMoney(c){
+if(c<=0n){say('Введите сумму больше нуля.','e');SND.err();return}
+var n=st.bal+c;SND.click();
+if(n>=CAP){st.bal=CAP;say('Достигнут максимум баланса: '+money(CAP),'w')}else{st.bal=n;say('Баланс пополнен на '+money(c)+'.','w')}
+render();
+}
+document.querySelectorAll('[data-add]').forEach(function(b){b.onclick=function(){addMoney(BigInt(b.dataset.add)*100n)}});
+$('addbtn').onclick=function(){addMoney(parse($('amt').value))};
+$('reset').onclick=function(){if(busy)return;st.bal=10000n;st.spins=0;st.won=0n;st.bet=MIN;say('Баланс сброшен до '+money(10000n)+'.','l');SND.click();render()};
+
+/* барабаны */
+var fast=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+var shown=[0,1,2];
+function cell(i){return '<div class="cell">'+SYMS[i].e+'</div>'}
+reels.forEach(function(r,i){r.firstElementChild.innerHTML=cell(shown[i])});
+function spin(){
+if(busy)return;
+var p=parse($('bet').value);st.bet=p<MIN?MIN:p>CAP?CAP:p;
+if(st.bet>st.bal){say('Не хватает денег. Пополните баланс или уменьшите ставку.','e');SND.err();render();return}
+busy=true;$('spin').disabled=true;
+st.bal-=st.bet;st.spins++;render();say('Крутим…','l');
+var res=[pick(),pick(),pick()],bet=st.bet,done=0,tk=setInterval(SND.tick,85);
+reels.forEach(function(r,i){
+var sp=r.firstElementChild,n=14+i*5,h=cell(res[i]);
+for(var k=1;k<n-1;k++)h+=cell(pick());
+sp.innerHTML=h+cell(shown[i]);sp.style.height=n*100+'%';
+r.classList.remove('hit');r.classList.add('spin');
+var an=sp.animate([{transform:'translateY(-'+((n-1)/n*100)+'%)'},{transform:'translateY(0)'}],{duration:fast?200:1100+i*600,easing:'cubic-bezier(.2,.6,.25,1)',fill:'forwards'});
+an.onfinish=function(){shown[i]=res[i];sp.style.height='100%';sp.innerHTML=cell(res[i]);an.cancel();r.classList.remove('spin');SND.stop();
+if(++done===3){clearInterval(tk);finish(res,bet)}};
+});
+}
+function finish(res,bet){
+var a=res[0],b=res[1],c=res[2],win=0n,hit=[],kind='';
+if(a===b&&b===c){win=bet*BigInt(SYMS[a].m);hit=[0,1,2];say('Три в ряд! Выигрыш '+money(win)+' (×'+SYMS[a].m+')','w');kind=a===4?'mega':a===3?'big':'win'}
+else if(a===b||a===c||b===c){win=bet*7n/10n;hit=a===b?[0,1]:a===c?[0,2]:[1,2];say('Пара! Возврат '+money(win)+' (×0.7)','w');kind='pair'}
+else{say('Мимо. Попробуйте ещё раз.','l');SND.lose()}
+if(win>0n){st.bal=st.bal+win>CAP?CAP:st.bal+win;st.won+=win;hit.forEach(function(i){reels[i].classList.add('hit')})}
+busy=false;$('spin').disabled=false;render();
+if(kind==='pair')SND.pair();else if(kind==='win')SND.win();else if(kind==='big'||kind==='mega'){SND[kind==='mega'?'jack':'win']();jackpot(kind,win)}
+if(st.bal<MIN&&win===0n)say('Деньги закончились. Пополните баланс ниже.','e');
+}
+
+/* джекпот */
+var jpTimer=null;
+function hideJp(){$('jp').hidden=true;clearTimeout(jpTimer)}
+$('jp').onclick=hideJp;
+function jackpot(kind,win){
+var m=$('machine');$('jpt').innerHTML='<b>'+(kind==='mega'?'ДЖЕКПОТ!':'Большой выигрыш!')+'</b><span>'+money(win)+'</span>';
+$('jp').className='jp '+kind;$('jp').hidden=false;
+m.classList.remove('shake','glow');void m.offsetWidth;m.classList.add(kind==='mega'?'shake':'glow');
+if(!fast)burst(kind);
+clearTimeout(jpTimer);jpTimer=setTimeout(hideJp,kind==='mega'?6000:4000);
+}
+function burst(kind){
+var c=$('cv'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+var P=[],cols=['#ffd24d','#ff5f6d','#6fe3b0','#5fa8ff','#c77dff','#fff'],n=kind==='mega'?230:90;
+for(var i=0;i<n;i++)P.push({x:Math.random()*c.width,y:-20-Math.random()*c.height*.7,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,s:5+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[i%6],coin:kind==='mega'&&i%3===0});
+var t0=performance.now();
+(function f(t){x.clearRect(0,0,c.width,c.height);
+P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.05;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);
+if(p.coin){x.fillStyle='#ffd24d';x.strokeStyle='#b8860b';x.beginPath();x.arc(0,0,p.s,0,7);x.fill();x.stroke()}
+else{x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2)}x.restore()});
+if(t-t0<5500&&!$('jp').hidden)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})(t0);
+}
+
+$('spin').onclick=spin;
+document.addEventListener('keydown',function(e){
+if(e.code==='Space'&&!/INPUT|BUTTON|SELECT/.test(document.activeElement.tagName)&&!$('dlg').open){e.preventDefault();spin()}});
+setLoc();themeBtn();render();
+})();
+</script>
+</body>
+</html>

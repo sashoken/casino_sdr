@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Казино «Понарошку»</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#efe9f6;--panel:#fff;--ink:#25173a;--mute:#6b5b86;--brass:#9a6b10;--win:#0b8a5a;--lose:#b3263e;--reel:#f6f2fb;--line:#d8cce8;--btn:#25173a;--btnink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171020;--panel:#231736;--ink:#f3ecff;--mute:#a998c4;--brass:#e6b95c;--win:#6fe3b0;--lose:#ff7d93;--reel:#150d22;--line:#3a2a55;--btn:#e6b95c;--btnink:#1b1226}}
+:root[data-theme="dark"]{--bg:#171020;--panel:#231736;--ink:#f3ecff;--mute:#a998c4;--brass:#e6b95c;--win:#6fe3b0;--lose:#ff7d93;--reel:#150d22;--line:#3a2a55;--btn:#e6b95c;--btnink:#1b1226}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+main{max-width:520px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:1.5rem;font-weight:800;margin:0}
+.sub{color:var(--mute);margin:2px 0 18px;font-size:.9rem}
+.bal{display:flex;justify-content:space-between;align-items:baseline;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+.bal small{color:var(--mute)}
+.bal b{font-size:2rem;font-weight:800;color:var(--brass);font-variant-numeric:tabular-nums}
+.machine{margin:14px 0;background:var(--panel);border:2px solid var(--brass);border-radius:22px;padding:16px}
+.reels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.reel{background:var(--reel);border:2px solid var(--line);border-radius:14px;aspect-ratio:1/1.1;display:grid;place-items:center;font-size:clamp(3rem,16vw,4.6rem);transition:border-color .2s}
+.reel.spin{filter:blur(1.5px);border-color:var(--brass)}
+.reel.hit{border-color:var(--win);animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.07)}}
+.msg{min-height:3.2em;text-align:center;margin:12px 0 6px;font-weight:700}
+.msg.w{color:var(--win)}.msg.l{color:var(--mute)}.msg.e{color:var(--lose)}
+.betrow{display:flex;gap:6px;margin-bottom:10px}
+button,input{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:transparent;border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:700;min-height:44px}
+button:hover{border-color:var(--brass)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+input{background:var(--reel);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:44px;width:100%;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.betrow input{flex:1;min-width:0}
+.spinbtn{width:100%;background:var(--btn);color:var(--btnink);border:0;font-size:1.25rem;padding:14px;border-radius:14px}
+.spinbtn:disabled{opacity:.5;cursor:default}
+.lbl{font-size:.85rem;color:var(--mute);margin:0 0 6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:14px}
+.add{display:flex;gap:6px;flex-wrap:wrap}
+.add input{flex:1 1 90px}
+.add .go{background:var(--btn);color:var(--btnink);border:0}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+td{padding:5px 0;border-bottom:1px solid var(--line)}
+td:last-child{text-align:right;font-weight:700;color:var(--brass)}
+tr:last-child td{border:0}
+.foot{display:flex;justify-content:space-between;color:var(--mute);font-size:.85rem;margin-top:14px;gap:8px;flex-wrap:wrap}
+.foot button{min-height:36px;padding:6px 10px;font-weight:500}
+@media (prefers-reduced-motion:reduce){.reel.hit{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Казино «Понарошку»</h1>
+<p class="sub">Игровые монеты, настоящих денег здесь нет. Минимальная ставка — 0,10.</p>
+
+<div class="bal"><small>Баланс</small><b id="bal">0.00</b></div>
+
+<section class="machine" aria-label="Игровой автомат">
+<div class="reels" id="reels"><div class="reel">🍒</div><div class="reel">🍋</div><div class="reel">🔔</div></div>
+<div class="msg l" id="msg" role="status" aria-live="polite">Сделайте ставку и крутите.</div>
+<p class="lbl">Ставка</p>
+<div class="betrow">
+<button id="minus" aria-label="Уменьшить ставку">−</button>
+<input id="bet" inputmode="decimal" aria-label="Ставка" value="0.10">
+<button id="plus" aria-label="Увеличить ставку">+</button>
+<button id="half">½</button><button id="dbl">×2</button><button id="max">Макс</button>
+</div>
+<button class="spinbtn" id="spin">Крутить</button>
+</section>
+
+<section class="card">
+<p class="lbl">Пополнить баланс</p>
+<div class="add">
+<button data-add="10">+10</button><button data-add="100">+100</button><button data-add="1000">+1000</button>
+<input id="amt" inputmode="decimal" aria-label="Своя сумма" value="500">
+<button class="go" id="addbtn">Пополнить</button>
+</div>
+</section>
+
+<section class="card">
+<p class="lbl">Таблица выплат (множитель ставки)</p>
+<table>
+<tr><td>7️⃣ 7️⃣ 7️⃣</td><td>×100</td></tr>
+<tr><td>💎 💎 💎</td><td>×40</td></tr>
+<tr><td>🔔 🔔 🔔</td><td>×15</td></tr>
+<tr><td>🍋 🍋 🍋</td><td>×8</td></tr>
+<tr><td>🍒 🍒 🍒</td><td>×5</td></tr>
+<tr><td>Любая пара</td><td>×0.7</td></tr>
+</table>
+</section>
+
+<div class="foot">
+<span id="stats">Круток: 0</span>
+<button id="reset">Сбросить до 100</button>
+</div>
+</main>
+
+<script>
+(function(){
+var SYMS=[{e:'🍒',w:32,m:5},{e:'🍋',w:26,m:8},{e:'🔔',w:20,m:15},{e:'💎',w:14,m:40},{e:'7️⃣',w:8,m:100}];
+var MIN=10, CAP=100000000000;
+var st={bal:10000,bet:10,spins:0,won:0};
+try{var s=JSON.parse(localStorage.getItem('ponaroshku')||'null');if(s&&typeof s.bal==='number'){st=Object.assign(st,s)}}catch(e){}
+function save(){try{localStorage.setItem('ponaroshku',JSON.stringify(st))}catch(e){}}
+var $=function(id){return document.getElementById(id)};
+var reels=[].slice.call(document.querySelectorAll('.reel'));
+var busy=false;
+function fmt(c){return (c/100).toFixed(2)}
+function parse(v){var n=parseFloat(String(v).replace(',','.'));return isNaN(n)?0:Math.round(n*100)}
+function say(t,c){var m=$('msg');m.textContent=t;m.className='msg '+c}
+function render(){
+$('bal').textContent=fmt(st.bal);
+$('bet').value=fmt(st.bet);
+$('stats').textContent='Круток: '+st.spins+' · выиграно: '+fmt(st.won);
+save();
+}
+function setBet(c){st.bet=Math.max(MIN,Math.round(c));render()}
+function pick(){
+var r=Math.random()*100,a=0;
+for(var i=0;i<SYMS.length;i++){a+=SYMS[i].w;if(r<a)return i}
+return 0;
+}
+function step(){return st.bet<100?10:st.bet<1000?100:1000}
+$('minus').onclick=function(){setBet(st.bet-step())};
+$('plus').onclick=function(){setBet(st.bet+step())};
+$('half').onclick=function(){setBet(st.bet/2)};
+$('dbl').onclick=function(){setBet(st.bet*2)};
+$('max').onclick=function(){setBet(Math.max(MIN,st.bal))};
+$('bet').onchange=function(){setBet(parse(this.value))};
+function addMoney(c){
+if(c<=0){say('Введите сумму больше нуля.','e');return}
+st.bal=Math.min(CAP,st.bal+c);
+say('Баланс пополнен на '+fmt(c)+'.','w');render();
+}
+document.querySelectorAll('[data-add]').forEach(function(b){b.onclick=function(){addMoney(parseInt(b.dataset.add,10)*100)}});
+$('addbtn').onclick=function(){addMoney(parse($('amt').value))};
+$('reset').onclick=function(){if(busy)return;st.bal=10000;st.spins=0;st.won=0;st.bet=MIN;say('Баланс сброшен до 100.','l');render()};
+var fast=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+function spin(){
+if(busy)return;
+st.bet=Math.max(MIN,parse($('bet').value)||st.bet);
+if(st.bet>st.bal){say('Не хватает монет. Пополните баланс или уменьшите ставку.','e');render();return}
+busy=true;$('spin').disabled=true;
+st.bal-=st.bet;st.spins++;render();
+say('Крутим…','l');
+var res=[pick(),pick(),pick()];
+var bet=st.bet,done=0;
+reels.forEach(function(r,i){
+r.classList.remove('hit');r.classList.add('spin');
+var t=setInterval(function(){r.textContent=SYMS[Math.floor(Math.random()*SYMS.length)].e},70);
+setTimeout(function(){
+clearInterval(t);r.classList.remove('spin');r.textContent=SYMS[res[i]].e;
+if(++done===3)finish(res,bet);
+},(fast?150:900)+i*(fast?80:450));
+});
+}
+function finish(res,bet){
+var a=res[0],b=res[1],c=res[2],win=0,hit=[];
+if(a===b&&b===c){win=Math.round(bet*SYMS[a].m);hit=[0,1,2];say('Три в ряд! Выигрыш '+fmt(win)+' (×'+SYMS[a].m+')','w')}
+else if(a===b||a===c||b===c){win=Math.round(bet*0.7);hit=a===b?[0,1]:a===c?[0,2]:[1,2];say('Пара! Возврат '+fmt(win)+' (×0.7)','w')}
+else say('Мимо. Попробуйте ещё раз.','l');
+if(win>0){st.bal=Math.min(CAP,st.bal+win);st.won+=win;hit.forEach(function(i){reels[i].classList.add('hit')})}
+busy=false;$('spin').disabled=false;render();
+if(st.bal<MIN&&win===0)say('Монеты закончились. Пополните баланс ниже.','e');
+}
+$('spin').onclick=spin;
+document.addEventListener('keydown',function(e){
+if(e.code==='Space'&&!/INPUT|BUTTON/.test(document.activeElement.tagName)){e.preventDefault();spin()}
+});
+render();
+})();
+</script>
+</body>
+</html>
