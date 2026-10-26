@@ -1183,7 +1183,7 @@ root.classList.toggle('bold',TS.b);thBuild();thSch();
 /* сверка аккаунта при проверке кода вывода (только для разработчика) */
 function wdAudit(login,box){var k=String(login).toLowerCase();box.innerHTML='<p class="sub">…</p>';
 fb().then(function(db){if(!db){box.innerHTML='<b class="bad">'+T('a7')+'</b>';return}
-return Promise.all([db.collection('accounts').doc(k).get(),db.collection('board').doc(k).get(),db.collection('withdrawals').where('l','==',k).get()]).then(function(r){
+return Promise.all([db.collection('accounts').doc(k).get(),db.collection('board').where(firebase.firestore.FieldPath.documentId(),'==',k).limit(1).get().catch(function(){return null}),db.collection('withdrawals').where('l','==',k).get().catch(function(){return null})]).then(function(r){
 if(!r[0].exists){box.innerHTML='<b class="bad">'+T('au_f6')+'</b>';return}
 var U=unc(r[0].data()),d=U.d||{},fl=[],RR=RATE['₽'];
 function row(l,v){return '<div class="wvr"><span>'+T(l)+'</span><b>'+v+'</b></div>'}
@@ -1192,12 +1192,12 @@ if(U.dev){box.innerHTML='<p class="hint2">'+T('au_dev')+'</p>';return}
 var bal=BigInt(d.bal||'0'),won=BigInt(d.won||'0'),lost=BigInt(d.lost||'0'),init=10000n*RR,gi=0n,tp=0n,wo=0n,wn=0,tg=U.tg?TGR:0n;
 (U.g||[]).forEach(function(c){try{gi+=gval(c)}catch(e){}});
 (U.tp||[]).forEach(function(x){if(x.d===1)tp+=BigInt(x.a)*RR});
-r[2].forEach(function(x){var q=x.data(),t=q.status||(q.paid?'paid':'pending');if(t==='pending'||t==='paid'){wo+=BigInt(q.b||'0');wn++}});
+if(r[2])r[2].forEach(function(x){var q=x.data(),t=q.status||(q.paid?'paid':'pending');if(t==='pending'||t==='paid'){wo+=BigInt(q.b||'0');wn++}});
 var ab=gi<0n?-gi:gi,tol=init/4n+(ab+tp+tg+wo)/10n,base=init+gi+tp+tg-wo-lost,lo=base-tol,hi=base+won+tol;
 if(bal<lo||bal>hi)fl.push('au_f1');
 var hs=U.hs||[],sw=0,sl=0,sn=0,top=[];hs.forEach(function(e){sw+=e[1];sl+=e[2];sn+=e[3]||1;if((e[3]||1)===1)top.push(e)});
 if(BigInt(Math.round(sw))*100n>won+won/50n+RR*100n||BigInt(Math.round(sl))*100n>lost+lost/50n+RR*100n||sn>(+d.spins||0)+1)fl.push('au_f2');
-var B=r[1].exists?r[1].data():null,bb=Number(bal/100n);
+var B=r[1]&&!r[1].empty?r[1].docs[0].data():null,bb=Number(bal/100n);
 if(B&&Math.abs((B.bal||0)-bb)>Math.max(Math.abs(bb),Math.abs(B.bal||0))*.05+1000)fl.push('au_f3');
 if(U.cr&&Date.now()-U.cr<864e5)fl.push('au_f4');
 top.sort(function(a,b){return b[1]-a[1]});
