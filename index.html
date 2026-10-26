@@ -414,7 +414,7 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.25)}
 
 <script>
 (function(){
-var VER=39,ORIG_OK=(function(){var h=location.hostname,p=location.pathname;return (h==='sashoken.github.io'&&p.indexOf('/casino_sdr')===0)||h==='sites.google.com'||/\.googleusercontent\.com$/.test(h)})();
+var ACK='6LczagIuAAAAAOBnWYxiGXGuymw_G9wMxsE6lwpP',VER=39,ORIG_OK=(function(){var h=location.hostname,p=location.pathname;return (h==='sashoken.github.io'&&p.indexOf('/casino_sdr')===0)||h==='sites.google.com'||/\.googleusercontent\.com$/.test(h)})();
 var LS=(function(){var M={};try{M=JSON.parse(window.name.indexOf('sdr:')===0?window.name.slice(4):'{}')||{}}catch(e){}
 function mir(){try{window.name='sdr:'+JSON.stringify(M)}catch(e){}}
 return {getItem:function(k){try{var v=localStorage.getItem(k);if(v!==null)return v}catch(e){}return M[k]!==undefined?M[k]:null},setItem:function(k,v){M[k]=v;mir();try{localStorage.setItem(k,v)}catch(e){}}}})();
@@ -735,7 +735,7 @@ if(ACC.list.indexOf(k)<0)ACC.list.push(k);
 swapTo(k);b.classList.add('ok');b.textContent='✓';SND.win();
 setTimeout(function(){b.classList.remove('ok');adding=false;$('al').value=$('ap').value=$('areg').value='';$('acc').close();toast(T('welcome',{n:U.n}))},700)}
 Promise.all([hash(k+'|'+p),fb()]).then(function(r){var h=r[0],db=r[1],L=ACC.users[k],ref=db&&db.collection('accounts').doc(k);
-if(am){if(!db)return bad('a7');var rg0=$('areg').value,dd0=dnew();dd0.cur=RCUR[rg0]||'₽';var U0={n:l,h:h,d:dd0,id:'',reg:$('areg').value,t:Date.now()};
+if(am){if(!db)return bad('a7');var rg0=$('areg').value,dd0=dnew();dd0.cur=RCUR[rg0]||'₽';var U0={n:l,h:h,d:dd0,id:'',reg:$('areg').value,t:Date.now(),cr:Date.now()};
 return idPick(db,U0.reg,0).then(function(id){U0.id=id;var ir=db.collection('ids').doc(id);return db.runTransaction(function(tx){return Promise.all([tx.get(ref),tx.get(ir)]).then(function(r){if(r[0].exists)throw 'taken';if(r[1].exists)throw 'idt';tx.set(ref,cl(U0));tx.set(ir,{l:k,t:Date.now(),ver:VER})})})}).then(function(){LP[k]=sig(U0);SY[k]=true;fin(U0)},function(e){bad(e==='taken'?'a2':'a7')})}
 if(!db){if(L&&L.h===h)return fin(L);return bad(L?'a3':'a7')}
 return ref.get().then(function(s){
@@ -849,9 +849,9 @@ function openDev(){if($('dlg').open)$('dlg').close();if(!user){need('m13');retur
 var FBC={apiKey:"AIzaSyC6kQ87seWCmJgMi3EnH9Rsp8fbuVQrNTo",authDomain:"bonusdrop-c9647.firebaseapp.com",projectId:"bonusdrop-c9647",storageBucket:"bonusdrop-c9647.firebasestorage.app",messagingSenderId:"953859162910",appId:"1:953859162910:web:0d0553676db086dd7d7f0f",measurementId:"G-QLNLHBLMBK"};
 var DBP=null,unsub=null,SY={},LP={},pTm=null;
 function fb(){if(!ORIG_OK)return Promise.resolve(null);if(DBP)return DBP;DBP=new Promise(function(res){var dn=false;function fin(v){if(!dn){dn=true;res(v)}}
-function sc(u,cb){var s=document.createElement('script');s.src=u;s.onload=cb;s.onerror=function(){fin(null)};document.head.appendChild(s)}
+function sc(u,cb,sf){var s=document.createElement('script');s.src=u;s.onload=cb;s.onerror=function(){sf?cb():fin(null)};document.head.appendChild(s)}
 if(window.firebase&&firebase.apps&&firebase.apps.length)fin(firebase.firestore());
-else sc('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',function(){sc('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',function(){try{firebase.initializeApp(FBC);var d=firebase.firestore();try{d.settings({experimentalAutoDetectLongPolling:true,merge:true})}catch(e){}fin(d)}catch(e){fin(null)}})});
+else sc('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',function(){sc('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js',function(){sc('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',function(){try{firebase.initializeApp(FBC);try{firebase.appCheck().activate(ACK,true)}catch(e){}var d=firebase.firestore();try{d.settings({experimentalAutoDetectLongPolling:true,merge:true})}catch(e){}fin(d)}catch(e){fin(null)}})},1)});
 setTimeout(function(){fin(null)},12000)});
 DBP.then(function(d){if(!d)DBP=null});return DBP}
 function cl(U){var c=JSON.parse(JSON.stringify(U));delete c.cf;delete c.rs;c.ver=VER;if(c.hs){c.hj=JSON.stringify(c.hs);delete c.hs}return c}
@@ -943,7 +943,7 @@ if(p.length!==3||p[0]!=='BD1'||p[2]!==wsig(p[1]))return bad();
 var w;try{w=JSON.parse(ub64(p[1]));BigInt(w.b);BigInt(w.r);BigInt(w.a)}catch(e){return bad()}
 function row(l,v){return '<div class="wvr"><span>'+T(l)+'</span><b>'+v+'</b></div>'}
 var bk=bfind(w.k),h='<b class="good">✔ '+T('wr1')+'</b>'+row('wra',esc(fmt(BigInt(w.a))+' '+w.cu))+row('wrf',esc(String(w.f/100))+'%')+row('wrp',esc(fmtR(BigInt(w.r))))+row('wri',esc(w.u))+row('wrl',esc(w.l))+row('wrt',esc(w.p))+row('wrk',bk?blg(bk)+' '+esc(bnm(bk)):esc(w.k))+row('wrd',esc(new Date(w.t).toLocaleString(LOC[st.reg])));
-o.innerHTML=h+'<div id="wvdb"></div>';
+o.innerHTML=h+'<div id="wvdb"></div><div id="wvau" style="margin-top:12px"></div>';wdAudit(w.l,$('wvau'));
 fb().then(function(db){var e=$('wvdb');if(!e)return;if(!db){e.innerHTML=row('wrb','<span class="bad">'+T('wrb0')+'</span>');return}
 db.collection('withdrawals').doc(w.i).get().then(function(s){if(!s.exists){e.innerHTML=row('wrb','<span class="bad">'+T('wrb0')+'</span>');return}
 var sd=s.data(),stt=sd.status||(sd.paid?'paid':'pending');e.innerHTML=row('wrb','<span class="good">'+T('wrb1')+'</span>')+(stt==='paid'?'<b class="good">'+T('wrpd1')+'</b>':stt==='rejected'?'<b class="bad">'+T('wrrj1')+'</b>':stt==='cancelled'?'<b class="bad">'+T('wdp5')+'</b>':'<button id="wvp" style="width:100%;margin-top:8px">'+T('wrpd')+'</button><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="wvrf" style="width:auto;min-height:0"> '+T('wrrf')+'</label><button id="wvn" class="dng" style="width:100%;margin-top:6px">'+T('wrrj')+'</button>');
@@ -1179,6 +1179,32 @@ db.runTransaction(function(tx){return tx.get(ref).then(function(r){if(!r.exists|
 Object.defineProperty($('areg'),'value',{get:function(){var c=this.querySelector('.cs');return c?c.dataset.v:''},set:function(v){fillReg(v)}});
 root.classList.toggle('bold',TS.b);thBuild();thSch();
 
+
+/* сверка аккаунта при проверке кода вывода (только для разработчика) */
+function wdAudit(login,box){var k=String(login).toLowerCase();box.innerHTML='<p class="sub">…</p>';
+fb().then(function(db){if(!db){box.innerHTML='<b class="bad">'+T('a7')+'</b>';return}
+return Promise.all([db.collection('accounts').doc(k).get(),db.collection('board').doc(k).get(),db.collection('withdrawals').where('l','==',k).get()]).then(function(r){
+if(!r[0].exists){box.innerHTML='<b class="bad">'+T('au_f6')+'</b>';return}
+var U=unc(r[0].data()),d=U.d||{},fl=[],RR=RATE['₽'];
+function row(l,v){return '<div class="wvr"><span>'+T(l)+'</span><b>'+v+'</b></div>'}
+function R2(b){return esc(fmtR(b/RR))}
+if(U.dev){box.innerHTML='<p class="hint2">'+T('au_dev')+'</p>';return}
+var bal=BigInt(d.bal||'0'),won=BigInt(d.won||'0'),lost=BigInt(d.lost||'0'),init=10000n*RR,gi=0n,tp=0n,wo=0n,wn=0,tg=U.tg?TGR:0n;
+(U.g||[]).forEach(function(c){try{gi+=gval(c)}catch(e){}});
+(U.tp||[]).forEach(function(x){if(x.d===1)tp+=BigInt(x.a)*RR});
+r[2].forEach(function(x){var q=x.data(),t=q.status||(q.paid?'paid':'pending');if(t==='pending'||t==='paid'){wo+=BigInt(q.b||'0');wn++}});
+var ab=gi<0n?-gi:gi,tol=init/4n+(ab+tp+tg+wo)/10n,base=init+gi+tp+tg-wo-lost,lo=base-tol,hi=base+won+tol;
+if(bal<lo||bal>hi)fl.push('au_f1');
+var hs=U.hs||[],sw=0,sl=0,sn=0,top=[];hs.forEach(function(e){sw+=e[1];sl+=e[2];sn+=e[3]||1;if((e[3]||1)===1)top.push(e)});
+if(BigInt(Math.round(sw))*100n>won+won/50n+RR*100n||BigInt(Math.round(sl))*100n>lost+lost/50n+RR*100n||sn>(+d.spins||0)+1)fl.push('au_f2');
+var B=r[1].exists?r[1].data():null,bb=Number(bal/100n);
+if(B&&Math.abs((B.bal||0)-bb)>Math.max(Math.abs(bb),Math.abs(B.bal||0))*.05+1000)fl.push('au_f3');
+if(U.cr&&Date.now()-U.cr<864e5)fl.push('au_f4');
+top.sort(function(a,b){return b[1]-a[1]});
+var h='<p class="lbl">'+T('au_t')+'</p>'+row('au_age',U.cr?esc(Math.floor((Date.now()-U.cr)/864e5)+' d'):'—')+row('au_bal',R2(bal))+row('au_rng',R2(lo)+' … '+R2(hi))+row('au_wl',R2(won)+' / '+R2(lost))+row('au_h',esc(sn+' / '+(d.spins||0)))+row('au_bd',B?esc(fmtR(BigInt(B.bal||0)*100n/RR)):'—')+row('au_top',top.slice(0,3).map(function(e){return esc(fmtR(BigInt(Math.round(e[1]))*100n/RR))}).join('<br>')||'—')+row('au_wd',esc(wn+' · '+fmtR(wo/RR)));
+box.innerHTML=h+(fl.length?'<b class="bad">⚠ '+fl.map(function(x){return T(x)}).join('; ')+'</b>':'<b class="good">✔ '+T('au_ok')+'</b>')},function(){box.innerHTML='<b class="bad">'+T('a7')+'</b>'})})}
+Object.assign(D.ru,{au_t:'Сверка аккаунта',au_age:'Возраст аккаунта',au_bal:'Баланс сейчас',au_rng:'Ожидаемый диапазон',au_wl:'Выиграно / проиграно',au_h:'Круток в истории / всего',au_bd:'Баланс в таблице лидеров',au_top:'Крупнейшие выигрыши',au_wd:'Выводов (шт · сумма)',au_ok:'Расхождений не найдено',au_dev:'Аккаунт разработчика — сверка не применяется.',au_f1:'баланс вне ожидаемого диапазона',au_f2:'история круток не сходится со статистикой',au_f3:'баланс в таблице лидеров отличается от аккаунта',au_f4:'аккаунт моложе суток',au_f6:'аккаунт не найден в базе'});
+Object.assign(D.en,{au_t:'Account audit',au_age:'Account age',au_bal:'Current balance',au_rng:'Expected range',au_wl:'Won / lost',au_h:'Spins in history / total',au_bd:'Leaderboard balance',au_top:'Biggest wins',au_wd:'Withdrawals (count · sum)',au_ok:'No discrepancies found',au_dev:'Developer account — audit not applicable.',au_f1:'balance outside the expected range',au_f2:'spin history does not match stats',au_f3:'leaderboard balance differs from the account',au_f4:'account is under 24 hours old',au_f6:'account not found in the database'});
 /* ===== сессии ===== */
 var SID=(function(){var s=null;try{s=LS.getItem('bd-sid')}catch(e){}if(!s){s=rid(10);try{LS.setItem('bd-sid',s)}catch(e){}}return s})(),SIDLE=864e5,lastAct=0;
 function devName(){var u=navigator.userAgent,o=/Windows/.test(u)?'Windows':/Android/.test(u)?'Android':/iPhone|iPad/.test(u)?'iOS':/Mac/.test(u)?'macOS':/Linux/.test(u)?'Linux':'?',b=/Edg\//.test(u)?'Edge':/OPR\//.test(u)?'Opera':/Firefox/.test(u)?'Firefox':/Chrome/.test(u)?'Chrome':/Safari/.test(u)?'Safari':'';return o+(b?' · '+b:'')}
