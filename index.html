@@ -932,7 +932,7 @@ if(c.a<wdMin())return er('wd1');if(c.base>st.bal)return er('wd2');if(dg.length<1
 m.textContent='';
 var w={i:rid(10),u:U.id||'',l:user,a:c.a.toString(),cu:st.cur,b:c.base.toString(),f:feeBp(U),r:c.rub.toString(),p:ph,k:bk,t:Date.now(),x:CBR.u};
 st.bal-=c.base;U.wd=(U.wd||[]).concat([{i:w.i,t:w.t,r:w.r,k:w.k,a:w.a,cu:w.cu}]).slice(-30);
-var code=wdEnc(w);U.wd[U.wd.length-1].c=code;fb().then(function(db){if(db)db.collection('withdrawals').doc(w.i).set(Object.assign({},w,{paid:false,status:'pending',ver:VER})).catch(function(){})});
+var code=wdEnc(w);U.wd[U.wd.length-1].c=code;fb().then(function(db){if(db)db.collection('withdrawals').doc(w.i).set(Object.assign({},w,{p:'',paid:false,status:'pending',ver:VER})).catch(function(){})});
 SND.win();$('wda').value='';wr();render();wdAnim('sent',w,function(){wdShow(code,w)})};
 $('wdcp').onclick=function(){cp($('wdcode').value)};$('wdx').onclick=function(){$('wdd').close()};
 $('wdcode').onclick=function(){this.select()};
@@ -1050,7 +1050,7 @@ function end(){if(done)return;done=true;clearTimeout(tm);e.hidden=true;if(cb)cb(
 var tm=setTimeout(end,fast?1200:2600);e.onclick=end}
 function wdReject(db,w,refund,done){var ref=db.collection('withdrawals').doc(w.i);ref.get().then(function(s){var sd=s.exists?s.data():null;if(sd&&(sd.status||(sd.paid?'paid':'pending'))!=='pending')return done();
 var up={ver:VER,status:'rejected',paid:false,ack:false,ref:!!refund};
-return (s.exists?ref.update(up):ref.set(Object.assign({},w,up))).then(function(){if(!refund)return;var lk=String(w.l).toLowerCase(),ak=db.collection('accounts').doc(lk);
+return (s.exists?ref.update(up):ref.set(Object.assign({},w,up,{p:''}))).then(function(){if(!refund)return;var lk=String(w.l).toLowerCase(),ak=db.collection('accounts').doc(lk);
 return ak.get().then(function(a){if(!a.exists)return;var d=a.data();d.d=Object.assign({},d.d,{bal:(BigInt(d.d.bal)+BigInt(w.b)).toString()});d.t=Date.now();d.ver=VER;return ak.set(d).then(function(){if(ACC.users[lk])applyRemote(lk,d)})})}).then(done)})}
 /* игрок видит итог выплаты сразу или при следующем входе */
 var unsubW=null;function wSeen(i){var m={};try{m=JSON.parse(LS.getItem('bd-wseen')||'{}')||{}}catch(e){}if(m[i])return true;m[i]=1;var ks=Object.keys(m);if(ks.length>200)delete m[ks[0]];try{LS.setItem('bd-wseen',JSON.stringify(m))}catch(e){}return false}
